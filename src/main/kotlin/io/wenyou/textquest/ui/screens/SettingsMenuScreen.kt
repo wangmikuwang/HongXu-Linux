@@ -29,12 +29,12 @@ internal data class SettingsSection(val id: String, val title: String, val summa
     val icon: ImageVector, val color: Color, val keywords: String)
 
 internal val settingsSections = listOf(
-    SettingsSection("appearance", "外观与主题", "调整界面风格、颜色、字体、大小和图标", AppIcons.Star, Color(0xFFFF416C), "液态玻璃 帧率 深色 语言 壁纸 字重 缩放"),
-    SettingsSection("ai", "AI 服务与生成", "管理服务、默认模型、后台生成与通知", AppIcons.Refresh, Color(0xFF30BF60), "API 接口 密钥 模型 默认服务 通知 续航 后台 费用"),
+    SettingsSection("appearance", "外观与主题", "调整界面风格、颜色、字体与大小", AppIcons.Star, Color(0xFFFF416C), "液态玻璃 深色 语言 壁纸 字重 缩放"),
+    SettingsSection("ai", "AI 服务与生成", "管理服务、默认模型与生成费用", AppIcons.Refresh, Color(0xFF30BF60), "API 接口 密钥 模型 默认服务 费用"),
     SettingsSection("content", "内容偏好", "管理预置剧情与人物的内容范围", AppIcons.Person, Color(0xFFFFA000), "剧情 人物 成人"),
     SettingsSection("rules", "底层基调", "所有 AI 生成都必须遵守的安全规则", AppIcons.Build, Color(0xFF2789EF), "底层基调 规则 安全"),
     SettingsSection("backup", "存储与备份", "导入、导出剧情、人物、服务与存档", AppIcons.Create, Color(0xFFAA55DC), "数据 导出 导入 迁移 恢复"),
-    SettingsSection("system", "系统与关于", "检查更新、管理日志并查看应用信息", AppIcons.Info, Color(0xFF4CC5DF), "版本 更新 下载 安装 崩溃 日志 关于")
+    SettingsSection("system", "系统与关于", "检查更新、管理日志并查看应用信息", AppIcons.Info, Color(0xFF4CC5DF), "版本 更新 下载 崩溃 日志 关于")
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

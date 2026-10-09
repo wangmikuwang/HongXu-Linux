@@ -87,6 +87,14 @@ enum class SexualOrientation(val label: String) {
     @SerialName("bi") BI("双性恋"),
     @SerialName("pan") PAN("泛性恋"),
     @SerialName("asexual") ASEXUAL("无性恋"),
+    @SerialName("demisexual") DEMISEXUAL("半性恋"),
+    @SerialName("graysexual") GRAYSEXUAL("灰性恋"),
+    @SerialName("omni") OMNI("全性恋"),
+    @SerialName("poly") POLY("多性恋"),
+    @SerialName("abro") ABRO("流动性取向"),
+    @SerialName("aromantic") AROMANTIC("无浪漫倾向"),
+    @SerialName("unlabelled") UNLABELLED("不贴标签"),
+    // Older versions read values they do not know as UNKNOWN (AppJson coerces), so new entries stay compatible.
     @SerialName("unknown") UNKNOWN("未标注")
 }
 

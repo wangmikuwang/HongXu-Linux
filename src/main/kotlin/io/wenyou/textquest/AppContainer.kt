@@ -43,7 +43,8 @@ class AppContainer(context: Context, suppliedClient: ChatClient? = null) {
             applyPresetAssets(openAsset, listOf(
                 "presets/wenyou-romance-presets.json",
                 "presets/wenyou-extended-presets.json",
-                "presets/wenyou-diverse-presets.json"
+                "presets/wenyou-diverse-presets.json",
+                "presets/wenyou-spectrum-presets.json"
             ), markLgbt = true)
             // 非异性向的 18+ 内容：受「显示 LGBT」与「成人内容」两个开关共同约束。
             applyPresetAssets(openAsset,

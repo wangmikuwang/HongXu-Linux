@@ -32,6 +32,7 @@ import io.wenyou.textquest.ui.theme.ThemeStyle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.skia.EncodedImageFormat
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -52,6 +53,9 @@ class RenderSmokeTest {
         val container = WenYouApp.AppContainer(appContext)
         runBlocking { container.seedLibrary { openAsset(appContext, it) } }
         assertTrue(container.library.stories.value.isNotEmpty())
+        // Every bundled preset pack is merged on first launch (1.0.0 shipped without most of them).
+        val bundled = File("src/main/resources/presets").list()!!.map { "presets/$it" }.toSet()
+        assertEquals(bundled, container.settings.appliedPresetFiles())
 
         // The UI thread on the desktop is the Swing event thread; navigation checks for it.
         runBlocking(Dispatchers.Main) { renderHome(container, "home.png") }

@@ -55,6 +55,9 @@ private data class GeneratedCreation(val story: GeneratedStory? = null, val char
 // Reject unknown enum values instead of silently turning an action into its default type.
 private val CreationJson = Json(AppJson) { coerceInputValues = false }
 
+/** Wire names of every orientation; creation parsing is strict, so the prompt must list exactly these. */
+private val ORIENTATION_KEYS = SexualOrientation.serializer().descriptor.let { d -> (0 until d.elementsCount).joinToString("/") { d.getElementName(it) } }
+
 /** Only adapt known authoring wire variants; never manufacture missing content or references. */
 private fun creationWire(root: JsonObject): JsonObject {
     fun flags(value: JsonElement): JsonElement {
@@ -145,7 +148,7 @@ class AiCreator(private val client: ChatClient) {
             "exampleDialogue":"台词示例","greeting":"初见招呼","lgbt":false,"adult":false}]}
             必须补齐正常编辑表单的所有内容：story 还包括 colorIndex(0-11)、mode(ai_dm 或 script)、directorExtra(导演要求)、initialVariables(全局数值对象，例如 {"clues":0}，不要使用列表；人物数值只写入对应人物的 initial.metrics)、initialFlags(标记)、startNodeId、nodes。
             nodes 用节点名作键，每个节点包括 kind(narration/ai/ending)、title、speakerId(人物名字或空旁白)、text、prompt、choices([{text,next,conditions,effects,hint}])、onEnter、endTarget。节点跳转使用真实节点名或 @self；条件/效果中的 charId 使用人物名字或空全局。${if (mode == StoryMode.SCRIPT) "mode 必须为 script：生成可离线游玩的完整分支剧本，共 6–12 个连贯节点，从 startNodeId 开始；每个非结局节点提供 2–3 个 choices，next 必须指向真实节点名；至少 2 个不同的结局节点（kind=ending，choices 为空数组）；所有节点都能从开场到达，非结局节点不能没有选项；可用 conditions/effects 与变量让选择产生影响；每个节点 text 80–200 字。" else "mode 必须为 ai_dm：nodes 只生成 1 个完整开场节点，后续由导演在游玩时续写。"}
-            每个人物还必须补齐 colorIndex(0-11)、orientation(straight/gay/lesbian/bi/pan/asexual/unknown)、extraPrompt、initial:{metrics:{affection,trust,mood,energy,health,fatigue,arousal},flags:[],description:"初始穿着与外观"}。状态数值 0-100。填充符合人设的内容，无适用条件或效果时用空列表。initialFlags 和 initial.flags 必须用字符串数组，例如 ["metInCafe"]，不要写 {"metInCafe":true}；false 标记不要放入数组。
+            每个人物还必须补齐 colorIndex(0-11)、orientation(${ORIENTATION_KEYS})、extraPrompt、initial:{metrics:{affection,trust,mood,energy,health,fatigue,arousal},flags:[],description:"初始穿着与外观"}。状态数值 0-100。填充符合人设的内容，无适用条件或效果时用空列表。initialFlags 和 initial.flags 必须用字符串数组，例如 ["metInCafe"]，不要写 {"metInCafe":true}；false 标记不要放入数组。
             条件格式必须为 {"type":"var","name":"trust","op":"gte","value":30,"charId":"人物名"}；type 只能是 flag_true/flag_false/var，op 只能是 eq/ne/gt/gte/lt/lte。
             效果格式必须为 {"type":"add_var","name":"affection","value":5,"charId":"人物名"}；set_flag/clear_flag 只写 type、name、charId，不写 value；type 只能是 set_flag/clear_flag/set_var/add_var/random_var/roll，随机效果还包括 from/to。变量增减用 add_var、变量赋值用 set_var；禁止 type:"variable" 或 target 字段。旁白 speakerId 用空字符串。
             人物名必须互不相同，创建 1–4 位重要人物，设定彼此一致。不要输出实体 UUID、服务配置或 API Key；节点名允许用于故事内部跳转。
