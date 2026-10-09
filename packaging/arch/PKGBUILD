@@ -1,0 +1,31 @@
+# Arch Linux package built from this source tree: cd packaging/arch && makepkg -si
+pkgname=hongxu
+pkgver=0
+pkgrel=1
+pkgdesc='虹叙'
+arch=('x86_64')
+license=('GPL-3.0-or-later')
+depends=('libxext' 'libxrender' 'libxtst' 'libxi' 'freetype2' 'fontconfig' 'xdg-utils' 'hicolor-icon-theme')
+makedepends=('jdk17-openjdk')
+options=('!strip')
+
+_root="$startdir/../.."
+
+pkgver() {
+  tr -d '\r' < "$_root/version.properties" | sed -n 's/^versionMajor=//p; s/^versionMinor=//p; s/^versionPatch=//p' | paste -sd.
+}
+
+build() {
+  cd "$_root"
+  JAVA_HOME=/usr/lib/jvm/java-17-openjdk ./gradlew --no-daemon createDistributable
+}
+
+package() {
+  local image="$HOME/.gradle/caches/wnq-build/HongXu-Linux/compose/binaries/main/app/hongxu"
+  install -d "$pkgdir/opt" "$pkgdir/usr/bin"
+  cp -a "$image" "$pkgdir/opt/hongxu"
+  ln -s "/opt/hongxu/bin/hongxu" "$pkgdir/usr/bin/hongxu"
+  install -Dm644 "$_root/packaging/hongxu.desktop" "$pkgdir/usr/share/applications/hongxu.desktop"
+  install -Dm644 "$_root/src/main/resources/icon.png" "$pkgdir/usr/share/icons/hicolor/512x512/apps/hongxu.png"
+  install -Dm644 "$_root/LICENSE" "$pkgdir/usr/share/licenses/hongxu/LICENSE"
+}

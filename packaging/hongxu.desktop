@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=虹叙
+Comment=AI 互动剧情与角色扮演
+Exec=hongxu %f
+Icon=hongxu
+Terminal=false
+Categories=Game;

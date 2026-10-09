@@ -1,0 +1,1 @@
+Google Material Color Utilities, commit 5b3618b16fdc3825e21d5679bafd144662088ea1. Apache-2.0. Java source packages relocated under io.wenyou.textquest.colorutilities to avoid namespace conflicts. No algorithm changes. https://github.com/material-foundation/material-color-utilities
