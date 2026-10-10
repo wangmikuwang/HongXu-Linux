@@ -40,7 +40,7 @@ internal fun AiRevisionDialog(container: WenYouApp.AppContainer, original: AppBu
             Text("修改当前未保存的内容；先查看预览，再应用到表单，最后按保存。")
             AppField(instruction, { if (!busy) { instruction = it.take(2000); preview = null } }, "修改要求", modifier = Modifier.testTag("revision-instruction"), minLines = 2, maxLines = 4)
             if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
-            if (error.isNotBlank()) io.wenyou.textquest.ui.common.RawText(error, color = MaterialTheme.colorScheme.error)
+            if (error.isNotBlank()) io.wenyou.textquest.ui.common.AppText(error, color = MaterialTheme.colorScheme.error)
             preview?.let { CreationPreview(it) }
             UsagePanel(container.chatClient.usage)
         }
@@ -58,8 +58,8 @@ internal fun AiRevisionDialog(container: WenYouApp.AppContainer, original: AppBu
                 catch (e: Exception) { error = AiDirector.errorMessage(e) }
                 finally { busy = false }
             }
-        }) { io.wenyou.textquest.ui.common.RawText(if (preview == null) "生成修改预览" else "应用到表单") }
-    }, dismissButton = { AppTextButton(onClick = close) { io.wenyou.textquest.ui.common.RawText(if (busy) "取消生成" else "关闭") } })
+        }) { io.wenyou.textquest.ui.common.AppText(if (preview == null) "生成修改预览" else "应用到表单") }
+    }, dismissButton = { AppTextButton(onClick = close) { io.wenyou.textquest.ui.common.AppText(if (busy) "取消生成" else "关闭") } })
 }
 
 @Composable

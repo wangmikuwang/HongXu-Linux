@@ -73,8 +73,6 @@ private fun saveWindow(state: WindowState) {
 }
 
 fun main(args: Array<String>) {
-    // Simplified Chinese throughout, including Java's own dialogs (see Theme.kt).
-    java.util.Locale.setDefault(java.util.Locale.SIMPLIFIED_CHINESE)
     appContext = Context(dataDirectory())
     val container = WenYouApp.AppContainer(appContext)
     installCrashLogger(container)

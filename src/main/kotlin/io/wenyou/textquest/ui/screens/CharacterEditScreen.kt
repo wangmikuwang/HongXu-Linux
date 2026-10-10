@@ -68,7 +68,7 @@ fun CharacterEditScreen(container: WenYouApp.AppContainer, nav: NavHostControlle
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { io.wenyou.textquest.ui.common.RawText(if (ui.isNew) "新建角色" else "编辑角色") },
+                title = { io.wenyou.textquest.ui.common.AppText(if (ui.isNew) "新建角色" else "编辑角色") },
                 navigationIcon = {
                     IconButton(onClick = { nav.navigateUp() }) {
                         Icon(AppIcons.ArrowBack, "返回")
@@ -89,7 +89,7 @@ fun CharacterEditScreen(container: WenYouApp.AppContainer, nav: NavHostControlle
             item { AppTextButton(onClick = { revisionOpen = true }) { Text("一句话修改") } }
             if (ui.message.isNotBlank()) {
                 item { TonalCard(containerColor = MaterialTheme.colorScheme.tertiaryContainer) {
-                    io.wenyou.textquest.ui.common.RawText(ui.message, color = MaterialTheme.colorScheme.onTertiaryContainer)
+                    io.wenyou.textquest.ui.common.AppText(ui.message, color = MaterialTheme.colorScheme.onTertiaryContainer)
                 } }
             }
             item {

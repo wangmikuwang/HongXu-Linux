@@ -35,7 +35,7 @@ internal fun EasterEggTitle(text: String, style: TextStyle, tapMessage: String, 
     surprise?.let { message ->
         AlertDialog(onDismissRequest = { surprise = null },
             title = { Text("你发现了彩蛋！") },
-            text = { io.wenyou.textquest.ui.common.RawText(message) },
+            text = { io.wenyou.textquest.ui.common.AppText(message) },
             confirmButton = { AppTextButton(onClick = { surprise = null }) { Text("收下惊喜") } })
     }
 }

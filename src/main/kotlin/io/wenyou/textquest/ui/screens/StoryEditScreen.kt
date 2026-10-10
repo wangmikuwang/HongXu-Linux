@@ -113,7 +113,7 @@ fun StoryEditScreen(container: WenYouApp.AppContainer, nav: NavHostController, s
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { io.wenyou.textquest.ui.common.RawText(story?.title?.ifBlank { "未命名剧情" } ?: "剧情编辑器", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
+                title = { io.wenyou.textquest.ui.common.AppText(story?.title?.ifBlank { "未命名剧情" } ?: "剧情编辑器", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                 navigationIcon = {
                     IconButton(onClick = { nav.navigateUp() }) {
                         Icon(AppIcons.ArrowBack, "返回")
@@ -142,7 +142,7 @@ fun StoryEditScreen(container: WenYouApp.AppContainer, nav: NavHostController, s
             if (ui.message.isNotBlank()) {
                 item {
                     TonalCard(containerColor = MaterialTheme.colorScheme.tertiaryContainer) {
-                        io.wenyou.textquest.ui.common.RawText(ui.message, color = MaterialTheme.colorScheme.onTertiaryContainer)
+                        io.wenyou.textquest.ui.common.AppText(ui.message, color = MaterialTheme.colorScheme.onTertiaryContainer)
                     }
                 }
             }
@@ -487,7 +487,7 @@ private fun ChoiceEditor(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CondRows(title: String, conds: List<Cond>, onChange: (List<Cond>) -> Unit) {
-    io.wenyou.textquest.ui.common.RawText(title, style = MaterialTheme.typography.labelLarge)
+    io.wenyou.textquest.ui.common.AppText(title, style = MaterialTheme.typography.labelLarge)
     conds.forEachIndexed { i, cond ->
         Row(verticalAlignment = Alignment.CenterVertically) {
             AppDropdown(
@@ -501,7 +501,7 @@ private fun CondRows(title: String, conds: List<Cond>, onChange: (List<Cond>) ->
             OutlinedTextField(
                 value = cond.name,
                 onValueChange = { onChange(conds.replace(i, cond.copy(name = it))) },
-                label = { io.wenyou.textquest.ui.common.RawText(if (cond.type == CondType.VAR) "变量名" else "标记名") },
+                label = { io.wenyou.textquest.ui.common.AppText(if (cond.type == CondType.VAR) "变量名" else "标记名") },
                 singleLine = true,
                 modifier = Modifier.weight(1.5f)
             )
@@ -537,7 +537,7 @@ private fun CondRows(title: String, conds: List<Cond>, onChange: (List<Cond>) ->
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EffectRows(title: String, effects: List<Effect>, onChange: (List<Effect>) -> Unit) {
-    io.wenyou.textquest.ui.common.RawText(title, style = MaterialTheme.typography.labelLarge)
+    io.wenyou.textquest.ui.common.AppText(title, style = MaterialTheme.typography.labelLarge)
     effects.forEachIndexed { i, effect ->
         Column(Modifier.padding(vertical = 2.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -552,7 +552,7 @@ private fun EffectRows(title: String, effects: List<Effect>, onChange: (List<Eff
                 OutlinedTextField(
                     value = effect.name,
                     onValueChange = { onChange(effects.replace(i, effect.copy(name = it))) },
-                    label = { io.wenyou.textquest.ui.common.RawText(if (effect.type == EffectType.ROLL) "结果变量" else "变量/标记名") },
+                    label = { io.wenyou.textquest.ui.common.AppText(if (effect.type == EffectType.ROLL) "结果变量" else "变量/标记名") },
                     singleLine = true,
                     modifier = Modifier.weight(1.4f)
                 )
@@ -685,7 +685,7 @@ private fun NumField(
             draft = raw
             raw.toDoubleOrNull()?.let(onChange)
         },
-        label = { io.wenyou.textquest.ui.common.RawText(label) },
+        label = { io.wenyou.textquest.ui.common.AppText(label) },
         singleLine = true,
         modifier = modifier,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)

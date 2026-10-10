@@ -174,7 +174,7 @@ class StoryEditorViewModel(
     // ---------------- 选项 / 条件 / 效果 ----------------
 
     fun addChoice() {
-        updateSelected { n -> n.copy(choices = n.choices + ChoiceData(text = "新的选项")) }
+        updateSelected { n -> n.copy(choices = n.choices + ChoiceData(text = io.wenyou.textquest.ui.common.tr("新的选项"))) }
     }
 
     fun removeChoice(index: Int) = updateSelected { n ->
@@ -240,8 +240,9 @@ class StoryEditorViewModel(
     private fun blankNode(id: String): StoryNode = StoryNode(
         id = id,
         kind = NodeKind.NARRATION,
-        title = "新节点",
-        text = "（在此写下场景描述……支持 \${变量名} 插值。）",
+        // New content is written in the interface language.
+        title = io.wenyou.textquest.ui.common.tr("新节点"),
+        text = io.wenyou.textquest.ui.common.tr("（在此写下场景描述……支持 \${变量名} 插值。）"),
         choices = emptyList()
     )
 }

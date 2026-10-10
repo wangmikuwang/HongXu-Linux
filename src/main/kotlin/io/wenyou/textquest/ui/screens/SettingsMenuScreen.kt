@@ -54,7 +54,7 @@ internal fun SettingsMenuContent(onOpen: (String) -> Unit, modifier: Modifier = 
     var query by rememberSaveable { mutableStateOf("") }
     val language = LocalAppearance.current.language
     val visible = settingsSections.filter {
-        query.isBlank() || (it.title + " " + it.summary + " " + it.keywords + " " + uiLabel(it.title, language)).contains(query.trim(), ignoreCase = true)
+        query.isBlank() || (it.title + " " + it.summary + " " + it.keywords + " " + uiLabel(it.title, language) + " " + uiLabel(it.summary, language) + " " + uiLabel(it.keywords, language)).contains(query.trim(), ignoreCase = true)
     }
     LazyColumn(modifier.fillMaxSize().testTag("settings-menu"), contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)) {
         item {

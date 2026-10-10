@@ -70,7 +70,7 @@ fun ProviderEditScreen(container: WenYouApp.AppContainer, nav: NavHostController
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { io.wenyou.textquest.ui.common.RawText(if (ui.isNew) "接入 AI 服务" else "编辑服务") },
+                title = { io.wenyou.textquest.ui.common.AppText(if (ui.isNew) "接入 AI 服务" else "编辑服务") },
                 navigationIcon = {
                     IconButton(onClick = { nav.navigateUp() }) {
                         Icon(AppIcons.ArrowBack, "返回")
@@ -98,7 +98,7 @@ fun ProviderEditScreen(container: WenYouApp.AppContainer, nav: NavHostController
             if (ui.message.isNotBlank()) {
                 item {
                     TonalCard(containerColor = MaterialTheme.colorScheme.tertiaryContainer) {
-                        io.wenyou.textquest.ui.common.RawText(ui.message, color = MaterialTheme.colorScheme.onTertiaryContainer)
+                        io.wenyou.textquest.ui.common.AppText(ui.message, color = MaterialTheme.colorScheme.onTertiaryContainer)
                     }
                 }
             }
@@ -198,7 +198,7 @@ fun ProviderEditScreen(container: WenYouApp.AppContainer, nav: NavHostController
         AlertDialog(
             onDismissRequest = { showDelete = false },
             title = { Text("删除服务？") },
-            text = { Text("「${profile?.name ?: ""}」将被移除。") },
+            text = { val name = profile?.name.orEmpty(); Text("「$name」将被移除。") },
             confirmButton = {
                 AppTextButton(onClick = {
                     vm.delete()
@@ -231,7 +231,7 @@ private fun ModelPickerCard(ui: ProviderEditorState, vm: ProviderEditorViewModel
             }
             if (ui.listMessage.isNotBlank()) {
                 Spacer(Modifier.width(10.dp))
-                io.wenyou.textquest.ui.common.RawText(ui.listMessage, style = MaterialTheme.typography.bodySmall,
+                io.wenyou.textquest.ui.common.AppText(ui.listMessage, style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.readableAccent(MaterialTheme.colorScheme.tertiary),
                     modifier = Modifier.weight(1f))
             }

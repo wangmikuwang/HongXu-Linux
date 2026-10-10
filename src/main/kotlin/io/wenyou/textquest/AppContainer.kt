@@ -28,6 +28,7 @@ class AppContainer(context: Context, suppliedClient: ChatClient? = null) {
     init {
         // Every AI request built by this client carries the player's baseline.
         chatClient.baseline = library::currentBaseline
+        chatClient.outputLanguage = { io.wenyou.textquest.ui.common.resolveLanguage(settings.state.value.appearance.language) }
     }
     val shareInbox = ShareInbox(context)
     val devMode = DevMode(context)

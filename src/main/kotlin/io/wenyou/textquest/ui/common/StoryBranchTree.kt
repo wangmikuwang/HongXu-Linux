@@ -159,7 +159,7 @@ private fun BranchNode(story: Story, row: BranchRow, collapsed: Boolean, current
         })
         val content: @Composable ColumnScope.() -> Unit = {
             Column(Modifier.padding(12.dp)) {
-                io.wenyou.textquest.ui.common.RawText(row.label, style = MaterialTheme.typography.labelMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                io.wenyou.textquest.ui.common.AppText(row.label, style = MaterialTheme.typography.labelMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 io.wenyou.textquest.ui.common.RawText(node?.title?.ifBlank { row.nodeId.orEmpty() } ?: row.nodeId ?: "游玩时生成",
                     style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 val progress = when {
@@ -174,7 +174,7 @@ private fun BranchNode(story: Story, row: BranchRow, collapsed: Boolean, current
                         current -> colors.onPrimaryContainer
                         else -> colors.onSurfaceVariant
                     })
-                if (row.expandable) AppTextButton(onClick = onToggle) { io.wenyou.textquest.ui.common.RawText(if (collapsed) "展开分支" else "折叠分支") }
+                if (row.expandable) AppTextButton(onClick = onToggle) { io.wenyou.textquest.ui.common.AppText(if (collapsed) "展开分支" else "折叠分支") }
             }
         }
         if (onEdit != null) Card(onClick = { row.nodeId?.takeIf { it in story.nodes }?.let(onEdit) },

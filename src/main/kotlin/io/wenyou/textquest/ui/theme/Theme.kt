@@ -106,12 +106,6 @@ internal val DarkColors = darkColorScheme(
 )
 
 /** 共享主题入口：风格与明暗模式独立；Material You 支持 Android 12+ 壁纸取色。 */
-/**
- * The Linux edition is Simplified Chinese throughout: only interface labels have other translations, so any other
- * language (including an English system locale under "follow system") would mix languages on every screen.
- */
-private const val LINUX_LANGUAGE = "zh-CN"
-
 @Composable
 fun WenYouTheme(
     mode: ThemeMode = ThemeMode.SYSTEM,
@@ -146,7 +140,8 @@ fun WenYouTheme(
     val typography = androidx.compose.runtime.remember(style, appearance.fontFile, appearance.fontWeight, appearance.fontBold, context) {
         appearanceTypography(if (style == ThemeStyle.APPLE) AppleTypography else AppTypography, appearance, context)
     }
-    CompositionLocalProvider(LocalThemeStyle provides style, LocalAppearance provides appearance.copy(language = LINUX_LANGUAGE), LocalGlassEnabled provides appearance.glassEnabled,
+    androidx.compose.runtime.SideEffect { io.wenyou.textquest.ui.common.appLanguage = appearance.language }
+    CompositionLocalProvider(LocalThemeStyle provides style, LocalAppearance provides appearance, LocalGlassEnabled provides appearance.glassEnabled,
         androidx.compose.ui.platform.LocalDensity provides androidx.compose.ui.unit.Density(systemDensity.density * densityScale, systemDensity.fontScale * appearance.fontScale),
         LocalAccentPalette provides (prideTheme?.let { theme ->
             (theme.colors + if (theme == PrideTheme.DEMISEXUAL) listOf(Color.Black) else emptyList()).distinct()

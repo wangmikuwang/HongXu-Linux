@@ -54,9 +54,9 @@ internal fun AchievementsContent(records: List<AchievementRecord>, onDismiss: ()
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("${if (unlocked) "🏆" else "🔒"} ${achievement.title}", style = MaterialTheme.typography.titleMedium)
-                        io.wenyou.textquest.ui.common.RawText(achievement.description, style = MaterialTheme.typography.bodyMedium)
+                        io.wenyou.textquest.ui.common.AppText(achievement.description, style = MaterialTheme.typography.bodyMedium)
                         LinearProgressIndicator(progress = { progress.toFloat() / achievement.target }, modifier = Modifier.fillMaxWidth())
-                        io.wenyou.textquest.ui.common.RawText(if (unlocked) "已解锁 · ${DateFormat.getDateInstance().format(Date(record!!.unlockedAt))}"
+                        io.wenyou.textquest.ui.common.AppText(if (unlocked) "已解锁 · ${DateFormat.getDateInstance().format(Date(record!!.unlockedAt))}"
                             else "未解锁 · $progress / ${achievement.target}", style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }

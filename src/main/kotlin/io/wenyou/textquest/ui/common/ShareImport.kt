@@ -36,7 +36,8 @@ object ShareActions {
 
     private fun message(context: Context, kind: String, title: String, code: String): String {
         val app = appLabel(context)
-        return "我在「$app」分享了$kind《$title》，点开链接即可导入：\n${link(code)}\n（也可以复制这段文字，再打开「$app」自动识别）"
+        return if (kind == "角色") trf("我在「{0}」分享了角色《{1}》，点开链接即可导入：\n{2}\n（也可以复制这段文字，再打开「{0}」自动识别）", app, title, link(code))
+        else trf("我在「{0}」分享了剧情《{1}》，点开链接即可导入：\n{2}\n（也可以复制这段文字，再打开「{0}」自动识别）", app, title, link(code))
     }
 
     fun sendLink(context: Context, kind: String, title: String, code: String) =
@@ -91,7 +92,9 @@ fun SharedImportHost(container: WenYouApp.AppContainer) {
                 }
                 Text(
                     if (newStories + newCharacters == 0) "这些内容都已经在资料库里了。"
-                    else "将新增 ${listOfNotNull(newStories.takeIf { it > 0 }?.let { "$it 部剧情" }, newCharacters.takeIf { it > 0 }?.let { "$it 位角色" }).joinToString("、")}；已有内容会跳过，不会被覆盖。",
+                    else if (newCharacters == 0) "将新增 $newStories 部剧情；已有内容会跳过，不会被覆盖。"
+                    else if (newStories == 0) "将新增 $newCharacters 位角色；已有内容会跳过，不会被覆盖。"
+                    else "将新增 $newStories 部剧情和 $newCharacters 位角色；已有内容会跳过，不会被覆盖。",
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

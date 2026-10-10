@@ -115,7 +115,7 @@ fun Pill(text: String, modifier: Modifier = Modifier, container: Color? = null, 
         shape = RoundedCornerShape(50),
         color = fill ?: MaterialTheme.colorScheme.surfaceContainerHigh
     ) {
-        io.wenyou.textquest.ui.common.RawText(
+        io.wenyou.textquest.ui.common.AppText(
             text,
             maxLines = 2, overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.labelMedium,
@@ -138,7 +138,7 @@ fun FilterTag(label: String, selected: Boolean, onClick: () -> Unit, modifier: M
             else Surface(modifier = Modifier.size(10.dp), shape = CircleShape, color = accent,
                 border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline)) {}
         }} else null,
-        shape = RoundedCornerShape(50), label = { io.wenyou.textquest.ui.common.RawText(label, maxLines = 2, overflow = TextOverflow.Ellipsis) },
+        shape = RoundedCornerShape(50), label = { io.wenyou.textquest.ui.common.AppText(label, maxLines = 2, overflow = TextOverflow.Ellipsis) },
         colors = FilterChipDefaults.filterChipColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
             labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -236,10 +236,10 @@ fun AppField(
         singleLine = singleLine,
         minLines = effMin,
         maxLines = effMax,
-        placeholder = if (placeholder.isNotBlank()) ({ io.wenyou.textquest.ui.common.RawText(placeholder) }) else null,
+        placeholder = if (placeholder.isNotBlank()) ({ io.wenyou.textquest.ui.common.AppText(placeholder) }) else null,
         keyboardOptions = keyboardOptions,
         visualTransformation = visualTransformation,
-        supportingText = if (supporting.isNotBlank()) ({ io.wenyou.textquest.ui.common.RawText(supporting) }) else null
+        supportingText = if (supporting.isNotBlank()) ({ io.wenyou.textquest.ui.common.AppText(supporting) }) else null
     )
 }
 
@@ -258,7 +258,7 @@ fun <T> AppDropdown(
     var expanded by remember { mutableStateOf(false) }
     if (LocalAppearance.current.popupStyle == "dialog") {
         Box(modifier) {
-            OutlinedTextField(value = options.firstOrNull { it.second == selected }?.first ?: "", onValueChange = {},
+            OutlinedTextField(value = uiLabel(options.firstOrNull { it.second == selected }?.first ?: "", LocalAppearance.current.language), onValueChange = {},
                 readOnly = true, enabled = enabled, singleLine = true, label = { Text(label) },
                 modifier = Modifier.fillMaxWidth().clickable(enabled = enabled) { expanded = true })
             Box(Modifier.matchParentSize().clickable(enabled = enabled) { expanded = true })
@@ -266,7 +266,7 @@ fun <T> AppDropdown(
         if (expanded) androidx.compose.material3.AlertDialog(onDismissRequest = { expanded = false }, title = { Text(label) },
             text = { androidx.compose.foundation.lazy.LazyColumn { options.forEach { (name, value) -> item {
                 Row(Modifier.fillMaxWidth().selectable(value == selected, role = Role.RadioButton, onClick = { onSelect(value); expanded = false }).padding(12.dp)) {
-                    androidx.compose.material3.RadioButton(value == selected, onClick = null); io.wenyou.textquest.ui.common.RawText(name, Modifier.padding(start = 12.dp))
+                    androidx.compose.material3.RadioButton(value == selected, onClick = null); io.wenyou.textquest.ui.common.AppText(name, Modifier.padding(start = 12.dp))
                 }
             } } } }, confirmButton = { AppTextButton(onClick = { expanded = false }) { Text("关闭") } })
         return
@@ -277,7 +277,7 @@ fun <T> AppDropdown(
         modifier = modifier
     ) {
         OutlinedTextField(
-            value = options.firstOrNull { it.second == selected }?.first ?: "",
+            value = uiLabel(options.firstOrNull { it.second == selected }?.first ?: "", LocalAppearance.current.language),
             onValueChange = {},
             readOnly = true,
             enabled = enabled,
@@ -290,12 +290,12 @@ fun <T> AppDropdown(
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.menuAnchor(androidx.compose.material3.ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled).fillMaxWidth(),
             isError = error != null,
-            supportingText = error?.let { { io.wenyou.textquest.ui.common.RawText(it) } }
+            supportingText = error?.let { { io.wenyou.textquest.ui.common.AppText(it) } }
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { (text, value) ->
                 DropdownMenuItem(
-                    text = { io.wenyou.textquest.ui.common.RawText(text) },
+                    text = { io.wenyou.textquest.ui.common.AppText(text) },
                     onClick = {
                         onSelect(value)
                         expanded = false

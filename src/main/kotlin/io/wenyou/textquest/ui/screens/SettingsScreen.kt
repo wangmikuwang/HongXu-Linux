@@ -179,7 +179,7 @@ fun SettingsScreen(container: WenYouApp.AppContainer, nav: NavHostController, up
             if (ui.message.isNotBlank()) {
                 item {
                     TonalCard(containerColor = MaterialTheme.colorScheme.tertiaryContainer) {
-                        io.wenyou.textquest.ui.common.RawText(ui.message, color = MaterialTheme.colorScheme.onTertiaryContainer)
+                        io.wenyou.textquest.ui.common.AppText(ui.message, color = MaterialTheme.colorScheme.onTertiaryContainer)
                     }
                 }
             }
@@ -290,7 +290,7 @@ fun SettingsScreen(container: WenYouApp.AppContainer, nav: NavHostController, up
                         Text("崩溃日志保存位置", style = MaterialTheme.typography.labelLarge)
                         Spacer(Modifier.height(6.dp))
                         val dir = vm.crashDir()
-                        io.wenyou.textquest.ui.common.RawText(if (dir != null) "已设置：$dir" else "默认保存在应用内。可选择系统文档目录。",
+                        io.wenyou.textquest.ui.common.AppText(if (dir != null) "已设置：$dir" else "默认保存在应用内。可选择系统文档目录。",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.height(10.dp))

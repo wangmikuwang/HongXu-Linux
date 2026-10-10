@@ -96,10 +96,10 @@ internal fun PrideGallery(unlocked: Boolean, enabled: Boolean, showLgbt: Boolean
                             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 PrideFlag(theme, Modifier.fillMaxWidth())
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    io.wenyou.textquest.ui.common.RawText(theme.label, Modifier.weight(1f), style = MaterialTheme.typography.titleSmall)
+                                    io.wenyou.textquest.ui.common.AppText(theme.label, Modifier.weight(1f), style = MaterialTheme.typography.titleSmall)
                                     if (enabled && selectedTheme == theme) Icon(AppIcons.Check, "已选中", Modifier.size(20.dp))
                                 }
-                                io.wenyou.textquest.ui.common.RawText(theme.description, style = MaterialTheme.typography.bodySmall,
+                                io.wenyou.textquest.ui.common.AppText(theme.description, style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }

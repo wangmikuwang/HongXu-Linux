@@ -67,13 +67,13 @@ fun CreationDialog(container: WenYouApp.AppContainer, nav: NavHostController, on
                 } else {
                     io.wenyou.textquest.ui.common.RawText(ui.idea, style = MaterialTheme.typography.bodyMedium)
                     LinearProgressIndicator(Modifier.fillMaxWidth())
-                    io.wenyou.textquest.ui.common.RawText(if (ui.saving) "正在保存…" else if (ui.draft != null) "正在修改草稿…" else if (ui.kind == CreationKind.STORY) (if (ui.mode == io.wenyou.textquest.data.model.StoryMode.SCRIPT) "正在创作分支剧本与人设…" else "正在创作剧情与人设…") else "正在创作人物设定…")
+                    io.wenyou.textquest.ui.common.AppText(if (ui.saving) "正在保存…" else if (ui.draft != null) "正在修改草稿…" else if (ui.kind == CreationKind.STORY) (if (ui.mode == io.wenyou.textquest.data.model.StoryMode.SCRIPT) "正在创作分支剧本与人设…" else "正在创作剧情与人设…") else "正在创作人物设定…")
                 }
                 if (ui.busy || ui.draft != null || ui.error.isNotBlank()) UsagePanel(container.chatClient.usage)
-                io.wenyou.textquest.ui.common.RawText(if (profile == null) "还没有配置 AI 服务" else "使用 AI 服务：${profile.name}", style = MaterialTheme.typography.bodySmall)
+                io.wenyou.textquest.ui.common.AppText(if (profile == null) "还没有配置 AI 服务" else "使用 AI 服务：${profile.name}", style = MaterialTheme.typography.bodySmall)
                 if (ui.kind == CreationKind.STORY) Text(if (ui.mode == io.wenyou.textquest.data.model.StoryMode.SCRIPT) "生成可离线游玩的分支剧本：多个场景、选项与结局，以及人物与变量；保存前可用一句话继续修改。" else "生成开场、世界观与人物，游玩时由 AI 导演即兴续写；保存前可用一句话继续修改。", style = MaterialTheme.typography.bodySmall)
                 if (profile == null) AppTextButton(onClick = { close(); nav.navigate(R.PROVIDERS) }) { Text("配置 AI 服务") }
-                if (ui.error.isNotBlank()) io.wenyou.textquest.ui.common.RawText(ui.error, color = MaterialTheme.colorScheme.error)
+                if (ui.error.isNotBlank()) io.wenyou.textquest.ui.common.AppText(ui.error, color = MaterialTheme.colorScheme.error)
                 ui.draft?.let { draft ->
                     CreationPreview(draft)
                     if (!ui.busy) {
@@ -86,11 +86,11 @@ fun CreationDialog(container: WenYouApp.AppContainer, nav: NavHostController, on
         },
         confirmButton = {
             Button(modifier = Modifier.testTag("creation-confirm"), onClick = { focus.clearFocus(); if (ui.draft == null) vm.generate() else vm.save() }, enabled = !ui.busy && (ui.draft != null || profile != null) && ui.idea.isNotBlank()) {
-                io.wenyou.textquest.ui.common.RawText(if (ui.draft == null) "开始创建" else "保存并编辑")
+                io.wenyou.textquest.ui.common.AppText(if (ui.draft == null) "开始创建" else "保存并编辑")
             }
         },
         dismissButton = {
-            AppTextButton(onClick = close, enabled = !ui.saving) { io.wenyou.textquest.ui.common.RawText(if (ui.busy) "取消生成" else "关闭") }
+            AppTextButton(onClick = close, enabled = !ui.saving) { io.wenyou.textquest.ui.common.AppText(if (ui.busy) "取消生成" else "关闭") }
         }
     )
 }

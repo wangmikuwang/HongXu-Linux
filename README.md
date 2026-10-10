@@ -52,4 +52,4 @@
 
 ## 许可
 
-本应用以 [GPL-3.0](LICENSE) 发布。随附组件：Ionicons（MIT）、霞鹜文楷精简子集「Bundled Kai」（SIL OFL 1.1）、Noto Color Emoji（SIL OFL 1.1）、Material Color Utilities（Apache-2.0），许可文本见 `src/main/resources/licenses/` 与 `third_party/`。
+本应用以 [GPL-3.0](LICENSE) 发布。随附组件：Ionicons（MIT）、霞鹜文楷精简子集「Bundled Kai」（SIL OFL 1.1）、Noto Color Emoji（SIL OFL 1.1）、Material Color Utilities（Apache-2.0）、OpenCC 简繁字表（Apache-2.0），许可文本见 `src/main/resources/licenses/` 与 `third_party/`。

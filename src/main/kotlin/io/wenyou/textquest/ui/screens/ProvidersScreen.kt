@@ -152,7 +152,7 @@ private fun ProviderCard(
                         Pill("默认", container = MaterialTheme.colorScheme.primary)
                     }
                 }
-                io.wenyou.textquest.ui.common.RawText(profile.kind.label, style = MaterialTheme.typography.bodySmall,
+                io.wenyou.textquest.ui.common.AppText(profile.kind.label, style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                 Text("模型：${profile.model}", style = MaterialTheme.typography.bodySmall, maxLines = 1)
                 Text("地址：${profile.baseUrl}", style = MaterialTheme.typography.bodySmall,

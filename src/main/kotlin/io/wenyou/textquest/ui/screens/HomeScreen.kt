@@ -192,10 +192,10 @@ private fun HomeWelcome(
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         TonalCard {
-            io.wenyou.textquest.ui.common.RawText(if (hasSave) "正在续写" else "故事，从这里开始", style = MaterialTheme.typography.labelLarge,
+            io.wenyou.textquest.ui.common.AppText(if (hasSave) "正在续写" else "故事，从这里开始", style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(8.dp))
-            io.wenyou.textquest.ui.common.RawText(journeyTitle ?: "开启第一段旅程", style = MaterialTheme.typography.headlineSmall,
+            io.wenyou.textquest.ui.common.AppText(journeyTitle ?: "开启第一段旅程", style = MaterialTheme.typography.headlineSmall,
                 maxLines = 2, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(16.dp))
             Button(onClick = onContinue, colors = ButtonDefaults.buttonColors(
@@ -203,7 +203,7 @@ private fun HomeWelcome(
                 contentColor = if (LocalAccentPalette.current.isNotEmpty()) accentForeground(distributedAccent(0, MaterialTheme.colorScheme.primary)) else MaterialTheme.colorScheme.onPrimary), modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                 Icon(AppIcons.PlayArrow, null)
                 Spacer(Modifier.width(6.dp))
-                io.wenyou.textquest.ui.common.RawText(if (hasSave) "继续旅程" else "开始剧情")
+                io.wenyou.textquest.ui.common.AppText(if (hasSave) "继续旅程" else "开始剧情")
             }
         }
     }
@@ -255,7 +255,7 @@ private fun ContinueCard(card: HomeCard, accentIndex: Int, onClick: () -> Unit, 
             Column(Modifier.weight(1f).clickable(onClick = onClick)) {
                 val custom = card.slot.name.takeUnless(::isAutoSaveName)
                 io.wenyou.textquest.ui.common.RawText(custom ?: story?.title ?: card.slot.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                if (custom != null || story == null) io.wenyou.textquest.ui.common.RawText(story?.title ?: "（剧情已删除）",
+                if (custom != null || story == null) io.wenyou.textquest.ui.common.AppText(story?.title ?: "（剧情已删除）",
                     style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(4.dp))

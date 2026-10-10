@@ -619,6 +619,17 @@ class PlayViewModel internal constructor(
         }
     }
 
+    /** The player sets a character's state by hand from the console; following AI turns read it like any other state. */
+    fun setCharacterState(charId: String, state: CharacterState) {
+        val s = session ?: return
+        if (_ui.value.stage == PlayStage.AI_WORKING || _ui.value.characters.none { it.id == charId }) return
+        val clean = state.copy(
+            metrics = state.metrics.filterKeys { CharacterMetrics.byKey(it) != null }.mapValues { CharacterMetrics.clamp(it.value) },
+            flags = state.flags.map { it.trim().take(120) }.filter { it.isNotEmpty() }.take(100).toSet(),
+            description = state.description.trim().take(1000))
+        session = s.copy(characterStates = s.characterStates + (charId to clean), updatedAt = System.currentTimeMillis())
+    }
+
     fun removeDirectorNote(index: Int) {
         session = session?.let { s -> s.copy(directorNotes = s.directorNotes.filterIndexed { i, _ -> i != index }) }
     }

@@ -47,8 +47,8 @@ private fun RoleRow(id: String, name: String, description: String, emoji: String
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         EmojiBadge(emoji, avatarColor(colorIndex), size = 40.dp)
         Column(Modifier.weight(1f)) {
-            io.wenyou.textquest.ui.common.RawText(name, style = MaterialTheme.typography.titleSmall)
-            if (description.isNotBlank()) io.wenyou.textquest.ui.common.RawText(description, style = MaterialTheme.typography.bodySmall, maxLines = 2,
+            io.wenyou.textquest.ui.common.AppText(name, style = MaterialTheme.typography.titleSmall)
+            if (description.isNotBlank()) io.wenyou.textquest.ui.common.AppText(description, style = MaterialTheme.typography.bodySmall, maxLines = 2,
                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         RadioButton(selected = selectedId == id, onClick = null)

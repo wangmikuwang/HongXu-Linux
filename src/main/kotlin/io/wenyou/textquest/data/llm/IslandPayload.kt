@@ -20,10 +20,10 @@ internal fun islandPayload(phase: String, seconds: Long, count: Int): String = b
         }
         val elapsed = "${seconds.coerceAtLeast(0)}秒"
         put("ticker", badge)
-        put("aodTitle", "AI生成 · $badge")
+        put("aodTitle", io.wenyou.textquest.ui.common.tr("AI生成 · $badge"))
         putJsonObject("baseInfo") {
-            put("type", 2); put("title", badge)
-            put("content", "${count.coerceAtLeast(1)}项AI请求 · 已用$elapsed")
+            put("type", 2); put("title", io.wenyou.textquest.ui.common.tr(badge))
+            put("content", io.wenyou.textquest.ui.common.tr("${count.coerceAtLeast(1)}项AI请求 · 已用$elapsed"))
         }
         putJsonObject("picInfo") { put("type", 1); put("pic", "miui.focus.pic_generation") }
         putJsonObject("param_island") {

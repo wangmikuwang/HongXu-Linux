@@ -22,7 +22,7 @@ internal fun AppUpdateCard(state: AppUpdateState, onCheck: () -> Unit, onOpenRel
             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         if (inFlatpak) return@TonalCard
         if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth().padding(top = 8.dp))
-        if (state.message.isNotBlank()) RawText(state.message, style = MaterialTheme.typography.bodyMedium)
+        if (state.message.isNotBlank()) Text(state.message, style = MaterialTheme.typography.bodyMedium)
         state.release?.let { release ->
             Text("新版 ${release.version}")
             if (release.notes.isNotBlank()) RawText(release.notes, style = MaterialTheme.typography.bodySmall, maxLines = 6, overflow = TextOverflow.Ellipsis)

@@ -244,9 +244,9 @@ private fun CharacterEmptyState(title: String, body: String, showReset: Boolean,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        io.wenyou.textquest.ui.common.RawText(title, style = MaterialTheme.typography.titleLarge)
+        io.wenyou.textquest.ui.common.AppText(title, style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(8.dp))
-        io.wenyou.textquest.ui.common.RawText(body, style = MaterialTheme.typography.bodyMedium,
+        io.wenyou.textquest.ui.common.AppText(body, style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center)
         Spacer(Modifier.height(6.dp))

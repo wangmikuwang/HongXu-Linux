@@ -83,6 +83,9 @@ class ChatClient(ok: OkHttpClient = defaultClient(), val usage: UsageTracker = U
      */
     @Volatile var baseline: () -> String = { Baseline.DEFAULT }
 
+    /** The interface language ("zh-CN", "zh-TW", "en"); every request asks the model to write player-facing text in it. */
+    @Volatile var outputLanguage: () -> String = { "zh-CN" }
+
     private val client = ok
 
     suspend fun streamText(
@@ -107,7 +110,7 @@ class ChatClient(ok: OkHttpClient = defaultClient(), val usage: UsageTracker = U
         val timeoutMs = if (profile.model.contains("reasoner", ignoreCase = true)) 360_000L else 300_000L
         try {
             val (guardedSystem, guardedUser) = Baseline.guard(baseline(), system, user)
-            call = buildCall(profile, guardedSystem, guardedUser, options)
+            call = buildCall(profile, guardedSystem + languageDirective(outputLanguage()), guardedUser, options)
             val requestCall = call
             val result = withTimeout(timeoutMs) {
                 suspendCancellableCoroutine<ChatResult> { cont ->
@@ -423,4 +426,14 @@ class ChatClient(ok: OkHttpClient = defaultClient(), val usage: UsageTracker = U
             .retryOnConnectionFailure(true)
             .build()
     }
+}
+
+/**
+ * Asks for player-facing text in the interface language. Prompts stay in Chinese; JSON field names, ids and markers
+ * must not change, or the reply could not be read.
+ */
+internal fun languageDirective(language: String): String {
+    val name = when (language) { "en" -> "英语（English）"; "zh-TW" -> "繁体中文"; else -> return "" }
+    return "\n\n【输出语言】本次回复中所有面向玩家的文字（正文、旁白、台词、选项、标题、简介、人物设定、总结、导演回复）都必须用${name}书写，" +
+        "即使上文的设定、风格或记录使用其他语言、或写着「中文」。JSON 字段名、节点与人物 id、[to:…] 等标记保持原样，不要翻译。"
 }

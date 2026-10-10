@@ -64,7 +64,7 @@ fun MessageHost(modifier: Modifier = Modifier) {
 
 fun appLabel(context: Context): String = BuildConfig.APP_NAME
 
-fun showMessage(context: Context, text: String) { messages.tryEmit(text) }
+fun showMessage(context: Context, text: String) { messages.tryEmit(io.wenyou.textquest.ui.common.tr(text)) }
 
 private val linux = System.getProperty("os.name").lowercase().contains("linux")
 

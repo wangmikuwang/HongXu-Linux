@@ -20,8 +20,16 @@ import java.util.Locale
 import java.text.SimpleDateFormat
 import java.util.Date
 
-private fun UsageRecord.label(): String = "$service · $model · $status · ${elapsedMs / 1000.0} 秒\n输入 ${tokens.input ?: "未知"} / 输出 ${tokens.output ?: "未知"} tokens · 缓存命中 ${tokens.cached} / 未命中 ${tokens.uncached ?: "未知"} / 写入 ${tokens.cacheWrite}\n" +
-    (estimatedCost?.let { "估算费用 $currency ${String.format(Locale.ROOT, "%.6f", it)}" + (estimatedCostUpper?.let { upper -> "–${String.format(Locale.ROOT, "%.6f", upper)}" } ?: "") + if (pricingNote.isNotBlank()) "\n$pricingNote" else "" } ?: "费用未知（缺少用量或单价，取消/失败可能仍计费）")
+private fun UsageRecord.label(): String {
+    val unknown = tr("未知")
+    val cost = estimatedCost?.let { low ->
+        val range = String.format(Locale.ROOT, "%.6f", low) + (estimatedCostUpper?.let { "–" + String.format(Locale.ROOT, "%.6f", it) } ?: "")
+        trf("估算费用 {0} {1}", currency, range) + if (pricingNote.isNotBlank()) "\n" + tr(pricingNote) else ""
+    } ?: tr("费用未知（缺少用量或单价，取消/失败可能仍计费）")
+    return "$service · $model · ${tr(status)} · " + trf("{0} 秒", elapsedMs / 1000.0) + "\n" +
+        trf("输入 {0} / 输出 {1} tokens · 缓存命中 {2} / 未命中 {3} / 写入 {4}", tokens.input ?: unknown, tokens.output ?: unknown,
+            tokens.cached, tokens.uncached ?: unknown, tokens.cacheWrite) + "\n" + cost
+}
 
 @Composable
 fun UsagePanel(tracker: UsageTracker, showLast: Boolean = true, showStats: Boolean = true) {
@@ -55,7 +63,7 @@ fun UsageDialog(tracker: UsageTracker, onDismiss: () -> Unit) {
                         Text("已估算 ${list.size} 次：$currency ${String.format(Locale.ROOT, "%.6f", list.sumOf { it.estimatedCost!! })}" + if (list.any { it.estimatedCostUpper != null }) "–${String.format(Locale.ROOT, "%.6f", list.sumOf { it.estimatedCostUpper ?: it.estimatedCost!! })}" else "")
                     }
                     Text("${records.count { it.estimatedCost == null }} 次费用未知；未收录的模型或第三方服务，请到 AI 服务编辑页填写单价。")
-                    if (error.isNotBlank()) io.wenyou.textquest.ui.common.RawText(error, color = MaterialTheme.colorScheme.error)
+                    if (error.isNotBlank()) io.wenyou.textquest.ui.common.AppText(error, color = MaterialTheme.colorScheme.error)
                     records.asReversed().forEach { r ->
                         io.wenyou.textquest.ui.common.RawText(SimpleDateFormat("MM-dd HH:mm:ss", Locale.getDefault()).format(Date(r.time)) + "\n" + r.label(), style = MaterialTheme.typography.bodySmall)
                         HorizontalDivider()

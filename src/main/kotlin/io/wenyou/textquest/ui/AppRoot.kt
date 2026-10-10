@@ -126,7 +126,7 @@ fun WenYouAppRoot(container: WenYouApp.AppContainer, updateVm: AppUpdateViewMode
                 AlertDialog(
                     onDismissRequest = container.library::clearWriteError,
                     title = { Text("保存失败") },
-                    text = { io.wenyou.textquest.ui.common.RawText(writeError.orEmpty()) },
+                    text = { io.wenyou.textquest.ui.common.AppText(writeError.orEmpty()) },
                     confirmButton = { AppTextButton(onClick = container.library::clearWriteError) { Text("知道了") } }
                 )
             }
