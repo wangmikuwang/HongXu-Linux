@@ -70,6 +70,12 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -578,8 +584,13 @@ private fun DmInput(ui: PlayUi, vm: PlayViewModel) {
                 OutlinedTextField(
                     value = text,
                     onValueChange = { text = it },
-                    placeholder = { Text("输入你想做的事 / 说的话……") },
-                    modifier = Modifier.weight(1f),
+                    placeholder = { Text("输入你想做的事 / 说的话……（Enter 发送，Shift+Enter 换行）") },
+                    // Desktop: Enter sends, Shift+Enter starts a new line.
+                    modifier = Modifier.weight(1f).onPreviewKeyEvent { e ->
+                        val send = e.type == KeyEventType.KeyDown && e.key == Key.Enter && !e.isShiftPressed
+                        if (send && text.isNotBlank()) { vm.dmSend(text); text = "" }
+                        send
+                    },
                     maxLines = 3,
                     minLines = 1,
                     shape = RoundedCornerShape(22.dp),

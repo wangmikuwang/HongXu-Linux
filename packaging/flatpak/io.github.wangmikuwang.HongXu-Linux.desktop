@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=HongXu
+Name[zh_CN]=虹叙
+Comment=Text adventures and AI storytelling with diverse characters
+Comment[zh_CN]=多元人物与情感故事的文字冒险与 AI 叙事工坊
+Exec=hongxu %f
+Icon=io.github.wangmikuwang.HongXu-Linux
+Terminal=false
+Categories=Game;AdventureGame;
+Keywords=text adventure;interactive fiction;AI;文字冒险;剧情;
+StartupWMClass=io-wenyou-textquest-MainKt

@@ -1,0 +1,47 @@
+app-id: io.github.wangmikuwang.HongXu-Linux
+runtime: org.freedesktop.Platform
+runtime-version: '26.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk17
+command: hongxu
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --device=dri
+  # AI services the player configures
+  - --share=network
+  # Backups, share files and imported fonts or images; share posters are saved to Pictures
+  - --filesystem=xdg-documents
+  - --filesystem=xdg-download
+  - --filesystem=xdg-pictures
+modules:
+  - name: openjdk
+    buildsystem: simple
+    build-commands:
+      - /usr/lib/sdk/openjdk17/install.sh
+
+  - name: hongxu
+    buildsystem: simple
+    build-options:
+      append-path: /usr/lib/sdk/openjdk17/bin
+      env:
+        JAVA_HOME: /usr/lib/sdk/openjdk17/jvm/openjdk-17
+        OFFLINE_MAVEN_REPO: /run/build/hongxu/maven
+        GRADLE_USER_HOME: /run/build/hongxu/gradle-home
+    build-commands:
+      - gradle/bin/gradle --offline --no-daemon packageUberJarForCurrentOS
+      - install -Dm644 build/compose/jars/*.jar /app/lib/hongxu.jar
+      - install -Dm755 packaging/flatpak/launcher.sh /app/bin/hongxu
+      - install -Dm644 packaging/flatpak/${FLATPAK_ID}.desktop -t /app/share/applications
+      - install -Dm644 packaging/flatpak/${FLATPAK_ID}.metainfo.xml -t /app/share/metainfo
+      - install -Dm644 src/main/resources/icon.png /app/share/icons/hicolor/512x512/apps/${FLATPAK_ID}.png
+    sources:
+      - type: git
+        url: https://github.com/wangmikuwang/HongXu-Linux.git
+        tag: v1.2.0
+      - type: archive
+        url: https://services.gradle.org/distributions/gradle-9.8.1-bin.zip
+        sha256: dce76f55f8e251a3a1f130eb120f30b3d271de2b76c9b0729d316b5a1b6dc01f
+        dest: gradle
+      - maven-sources.json

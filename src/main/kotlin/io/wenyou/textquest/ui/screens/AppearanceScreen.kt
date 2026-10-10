@@ -194,11 +194,6 @@ fun AppearanceContent(prefs: AppearancePrefs, style: ThemeStyle, mode: ThemeMode
             Choice("标签显示", listOf("图标与文字" to "both", "仅图标" to "icons", "仅文字" to "text"), prefs.dockLabels, { value -> update { it.copy(dockLabels = value) } })
             Choice("玻璃材质", listOf("通透" to "clear", "均衡" to "balanced", "磨砂" to "frosted"), prefs.glassMaterial, { value -> update { it.copy(glassMaterial = value) } })
         } }
-        item { SectionHeader("语言") }
-        item { TonalCard {
-            Choice("应用语言", listOf("跟随系统" to "system", "简体中文" to "zh-CN", "繁體中文" to "zh-TW", "English" to "en"), prefs.language, { value -> update { it.copy(language = value) } })
-            Text("界面标签即时切换；剧情、角色与 AI 内容保留原文。", style = MaterialTheme.typography.bodySmall)
-        } }
     }
     colorTarget?.let { target ->
         ColorPickerDialog(if (target == "seed") prefs.seed else prefs.roleColors[target] ?: "#0066CC", { colorTarget = null }) { hex ->

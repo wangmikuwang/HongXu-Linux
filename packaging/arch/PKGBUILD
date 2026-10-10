@@ -21,10 +21,10 @@ build() {
 }
 
 package() {
-  local image="$HOME/.gradle/caches/wnq-build/HongXu-Linux/compose/binaries/main/app/hongxu"
+  local image="$HOME/.gradle/caches/wnq-build/HongXu-Linux/compose/binaries/main/app/虹叙"
   install -d "$pkgdir/opt" "$pkgdir/usr/bin"
   cp -a "$image" "$pkgdir/opt/hongxu"
-  ln -s "/opt/hongxu/bin/hongxu" "$pkgdir/usr/bin/hongxu"
+  ln -s "/opt/hongxu/bin/虹叙" "$pkgdir/usr/bin/hongxu"
   install -Dm644 "$_root/packaging/hongxu.desktop" "$pkgdir/usr/share/applications/hongxu.desktop"
   install -Dm644 "$_root/src/main/resources/icon.png" "$pkgdir/usr/share/icons/hicolor/512x512/apps/hongxu.png"
   install -Dm644 "$_root/LICENSE" "$pkgdir/usr/share/licenses/hongxu/LICENSE"

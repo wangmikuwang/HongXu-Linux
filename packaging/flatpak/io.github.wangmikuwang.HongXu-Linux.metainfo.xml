@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.wangmikuwang.HongXu-Linux</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>HongXu</name>
+  <name xml:lang="zh-CN">虹叙</name>
+  <summary>Text adventures and AI storytelling with diverse characters</summary>
+  <summary xml:lang="zh-CN">多元人物与情感故事的文字冒险与 AI 叙事工坊</summary>
+  <developer id="io.github.wangmikuwang">
+    <name>wangmikuwang</name>
+  </developer>
+  <description>
+    <p>HongXu is a text adventure workshop for stories about diverse people and relationships. Play branching scripts offline, or connect a large language model of your choice and improvise a story with an AI director and characters.</p>
+    <p xml:lang="zh-CN">虹叙是多元人物与情感故事的文字冒险与 AI 叙事工坊：离线游玩分支剧本，或接入你选择的大模型，让 AI 导演与角色陪你即兴共创。</p>
+    <ul>
+      <li>Branching scripts that play offline, and an AI director mode that writes the story with you</li>
+      <li xml:lang="zh-CN">可离线游玩的分支剧本，以及与你共同书写剧情的 AI 导演模式</li>
+      <li>Create stories and characters by hand, or from a single sentence with AI</li>
+      <li xml:lang="zh-CN">手动创建剧情与角色，或用一句话让 AI 生成</li>
+      <li>Saves, achievements, a story branch map and share codes for exchanging stories</li>
+      <li xml:lang="zh-CN">存档、成就、剧情分支图，以及用分享码交换剧情</li>
+      <li>Liquid glass and Material themes, colour presets and a bundled Kai typeface</li>
+      <li xml:lang="zh-CN">液态玻璃与 Material 主题、配色预设与内置楷体</li>
+    </ul>
+    <p>The interface is in Simplified Chinese. Stories, saves and AI keys stay on your computer; story text is sent only to the AI service you configure. Adult content is optional and off until you enable it in settings.</p>
+    <p xml:lang="zh-CN">界面为简体中文。剧情、存档与 AI 密钥只保存在本机，剧情文本只发送给你配置的 AI 服务。成人内容需在设置中手动开启。</p>
+  </description>
+  <launchable type="desktop-id">io.github.wangmikuwang.HongXu-Linux.desktop</launchable>
+  <provides>
+    <binary>hongxu</binary>
+  </provides>
+  <url type="homepage">https://github.com/wangmikuwang/HongXu-Linux</url>
+  <url type="bugtracker">https://github.com/wangmikuwang/HongXu-Linux/issues</url>
+  <url type="vcs-browser">https://github.com/wangmikuwang/HongXu-Linux</url>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/wangmikuwang/HongXu-Linux/v1.2.0/packaging/flatpak/screenshots/home.png</image>
+      <caption>Home</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/wangmikuwang/HongXu-Linux/v1.2.0/packaging/flatpak/screenshots/stories.png</image>
+      <caption>Story library</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/wangmikuwang/HongXu-Linux/v1.2.0/packaging/flatpak/screenshots/glass.png</image>
+      <caption>Theme options</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/wangmikuwang/HongXu-Linux/v1.2.0/packaging/flatpak/screenshots/create.png</image>
+      <caption>Create stories and characters</caption>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1">
+    <content_attribute id="violence-fantasy">mild</content_attribute>
+    <content_attribute id="violence-realistic">mild</content_attribute>
+    <content_attribute id="violence-bloodshed">mild</content_attribute>
+    <content_attribute id="drugs-alcohol">moderate</content_attribute>
+    <content_attribute id="drugs-tobacco">mild</content_attribute>
+    <content_attribute id="sex-themes">intense</content_attribute>
+    <content_attribute id="sex-homosexuality">intense</content_attribute>
+    <content_attribute id="language-profanity">mild</content_attribute>
+    <content_attribute id="language-humor">mild</content_attribute>
+    <content_attribute id="social-info">mild</content_attribute>
+  </content_rating>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </supports>
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+  <branding>
+    <color type="primary" scheme_preference="light">#f7f2fa</color>
+    <color type="primary" scheme_preference="dark">#4a3a6b</color>
+  </branding>
+  <categories>
+    <category>Game</category>
+    <category>AdventureGame</category>
+  </categories>
+  <keywords>
+    <keyword>text adventure</keyword>
+    <keyword>interactive fiction</keyword>
+    <keyword>AI</keyword>
+    <keyword xml:lang="zh-CN">文字冒险</keyword>
+    <keyword xml:lang="zh-CN">剧情</keyword>
+  </keywords>
+  <releases>
+    <release version="1.2.0" date="2026-10-10">
+      <description>
+        <p>Better keyboard and mouse support: a navigation rail on wide windows, Esc and the mouse back button go back, Enter sends, Ctrl + = / - / 0 zoom, and the window remembers its size. The interface is consistently Simplified Chinese, emoji display in colour on every system, and the app can be installed from Flathub.</p>
+        <p xml:lang="zh-CN">更适合键盘鼠标：宽窗口左侧导航栏、Esc 与鼠标侧键返回、Enter 发送、Ctrl + = / - / 0 缩放、记住窗口大小；界面统一为简体中文；各系统上的 Emoji 均以彩色显示；支持通过 Flathub 安装。</p>
+      </description>
+    </release>
+    <release version="1.1.0" date="2026-10-10">
+      <description>
+        <p>Every built-in story pack is included, plus seven new stories covering a wider range of sexual orientations and gender identities.</p>
+        <p xml:lang="zh-CN">补齐全部内置剧情包，新增 7 部覆盖更多性取向与性别身份的剧情。</p>
+      </description>
+    </release>
+    <release version="1.0.0" date="2026-10-10">
+      <description>
+        <p>First Linux release.</p>
+        <p xml:lang="zh-CN">首个 Linux 版本。</p>
+      </description>
+    </release>
+  </releases>
+</component>

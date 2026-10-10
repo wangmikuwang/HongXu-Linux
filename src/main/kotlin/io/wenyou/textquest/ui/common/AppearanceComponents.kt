@@ -32,9 +32,10 @@ fun AppText(text: String, modifier: Modifier = Modifier, color: Color = Color.Un
     overflow: TextOverflow = TextOverflow.Clip, softWrap: Boolean = true, maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1, onTextLayout: (TextLayoutResult) -> Unit = {}, style: TextStyle = LocalTextStyle.current) {
     val prefs = LocalAppearance.current
-    androidx.compose.material3.Text(uiLabel(text, prefs.language), modifier, color, fontSize, fontStyle,
-        prefs.resolveFontWeight(fontWeight ?: style.fontWeight), fontFamily, letterSpacing,
-        textDecoration, textAlign, lineHeight, overflow, softWrap, maxLines, minLines, onTextLayout, style)
+    androidx.compose.material3.Text(text = uiLabel(text = text, prefs.language), modifier = modifier, color = color, fontSize = fontSize, fontStyle = fontStyle,
+        fontWeight = prefs.resolveFontWeight(fontWeight ?: style.fontWeight), fontFamily = fontFamily, letterSpacing = letterSpacing,
+        textDecoration = textDecoration, textAlign = textAlign, lineHeight = lineHeight, overflow = overflow, softWrap = softWrap,
+        maxLines = maxLines, minLines = minLines, onTextLayout = onTextLayout, style = style)
 }
 
 /** User-authored content never participates in interface translation. */
@@ -46,9 +47,10 @@ fun RawText(text: String, modifier: Modifier = Modifier, color: Color = Color.Un
     overflow: TextOverflow = TextOverflow.Clip, softWrap: Boolean = true, maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1, onTextLayout: (TextLayoutResult) -> Unit = {}, style: TextStyle = LocalTextStyle.current) {
     val prefs = LocalAppearance.current
-    androidx.compose.material3.Text(text, modifier, color, fontSize, fontStyle,
-        prefs.resolveFontWeight(fontWeight ?: style.fontWeight), fontFamily, letterSpacing,
-        textDecoration, textAlign, lineHeight, overflow, softWrap, maxLines, minLines, onTextLayout, style)
+    androidx.compose.material3.Text(text = text, modifier = modifier, color = color, fontSize = fontSize, fontStyle = fontStyle,
+        fontWeight = prefs.resolveFontWeight(fontWeight ?: style.fontWeight), fontFamily = fontFamily, letterSpacing = letterSpacing,
+        textDecoration = textDecoration, textAlign = textAlign, lineHeight = lineHeight, overflow = overflow, softWrap = softWrap,
+        maxLines = maxLines, minLines = minLines, onTextLayout = onTextLayout, style = style)
 }
 
 /** Icon preferences affect glyph color, never add a second background or shrink the glyph. */

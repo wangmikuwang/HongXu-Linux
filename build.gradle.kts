@@ -25,8 +25,8 @@ val versionProps = Properties().apply { rootProject.file("version.properties").i
 val appVersionName = listOf("versionMajor", "versionMinor", "versionPatch").joinToString(".") { versionProps.getProperty(it) }
 val appVersionCode = versionProps.getProperty("versionCode").toInt()
 
-// Build output outside OneDrive, like the Android projects.
-layout.buildDirectory.set(File(System.getProperty("user.home"), ".gradle/caches/wnq-build/HongXu-Linux"))
+// Build output outside OneDrive, like the Android projects (Flatpak builds keep the default build/).
+if (System.getenv("FLATPAK_ID") == null) layout.buildDirectory.set(File(System.getProperty("user.home"), ".gradle/caches/wnq-build/HongXu-Linux"))
 
 val generateBuildConfig by tasks.registering {
     val out = layout.buildDirectory.dir("generated/buildconfig")
@@ -48,6 +48,7 @@ kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarg
 
 tasks.test {
     systemProperty("renderDir", layout.buildDirectory.dir("render").get().asFile.path)
+    providers.gradleProperty("storeScreenshots").orNull?.let { systemProperty("storeScreenshots", file(it).path) }
     filter {
         // Synced from the Android app but about its packaging (backup XML, changelog asset, preset files).
         excludeTestsMatching("*BackupSafetyTest.systemBackupsNeverCarryTheKeys")
@@ -60,7 +61,7 @@ sourceSets.main { kotlin.srcDir(generateBuildConfig) }
 
 dependencies {
     implementation(compose.desktop.currentOs)
-    implementation(compose.material3)
+    implementation(libs.jb.material3)
     implementation(libs.jb.lifecycle.viewmodel.compose)
     implementation(libs.jb.lifecycle.runtime.compose)
     implementation(libs.jb.navigation.compose)
@@ -79,13 +80,14 @@ compose.desktop {
         jvmArgs += listOf("-Dfile.encoding=UTF-8")
         nativeDistributions {
             targetFormats(TargetFormat.Deb, TargetFormat.Rpm)
-            packageName = "hongxu"
+            packageName = appName // menu entry and launcher show the Chinese name
             packageVersion = appVersionName
             description = appName
             vendor = "wangmikuwang"
             licenseFile.set(project.file("LICENSE"))
             modules("java.naming", "jdk.unsupported")
             linux {
+                packageName = "hongxu" // the .deb package itself keeps an ASCII name
                 iconFile.set(project.file("src/main/resources/icon.png"))
                 debMaintainer = "wangmikuwang@users.noreply.github.com"
                 menuGroup = "Game"

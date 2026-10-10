@@ -288,7 +288,7 @@ fun <T> AppDropdown(
                 focusedLabelColor = MaterialTheme.colorScheme.readableAccent(),
                 focusedBorderColor = MaterialTheme.colorScheme.readableAccent()),
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor(androidx.compose.material3.MenuAnchorType.PrimaryNotEditable, enabled).fillMaxWidth(),
+            modifier = Modifier.menuAnchor(androidx.compose.material3.ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled).fillMaxWidth(),
             isError = error != null,
             supportingText = error?.let { { io.wenyou.textquest.ui.common.RawText(it) } }
         )

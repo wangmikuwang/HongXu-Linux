@@ -1,16 +1,18 @@
 [versions]
-kotlin = "2.0.20"
-composeMultiplatform = "1.7.0"
-jbLifecycle = "2.8.3"
-jbNavigation = "2.8.0-alpha10"
-okhttp = "4.12.0"
-kotlinxSerialization = "1.7.3"
-kotlinxCoroutines = "1.8.1"
-zxing = "3.5.3"
+kotlin = "2.4.21"
+composeMultiplatform = "1.12.1"
+jbLifecycle = "2.11.0"
+jbNavigation = "2.9.2"
+okhttp = "5.5.0"
+kotlinxSerialization = "1.11.0"
+kotlinxCoroutines = "1.11.0"
+zxing = "3.5.4"
 junit = "4.13.2"
-errorprone = "2.28.0"
+jbMaterial3 = "1.9.0"
+errorprone = "2.50.0"
 
 [libraries]
+jb-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "jbMaterial3" }
 jb-lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "jbLifecycle" }
 jb-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "jbLifecycle" }
 jb-navigation-compose = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "jbNavigation" }

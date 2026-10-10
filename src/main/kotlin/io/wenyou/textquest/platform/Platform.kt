@@ -23,8 +23,6 @@ import org.jetbrains.skia.Image
 import org.jetbrains.skia.ImageFilter
 import org.jetbrains.skia.RuntimeEffect
 import org.jetbrains.skia.RuntimeShaderBuilder
-import java.awt.FileDialog
-import java.awt.Frame
 import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.StringSelection
@@ -32,6 +30,8 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.InputStream
 import javax.swing.JFileChooser
+import javax.swing.JOptionPane
+import javax.swing.UIManager
 
 /*
  * What the screens need from the desktop: files, clipboard, links, messages and Skia shaders.
@@ -40,6 +40,9 @@ import javax.swing.JFileChooser
 
 /** A document the user picked or created. */
 typealias PlatformFile = File
+
+/** Installed from Flathub: the software centre updates the app, so it never checks or prompts on its own. */
+val inFlatpak: Boolean = System.getenv("FLATPAK_ID") != null
 
 /** Set once at startup (Main.kt): where the app keeps its data. */
 lateinit var appContext: Context
@@ -119,14 +122,27 @@ fun openInput(context: Context, file: PlatformFile): InputStream? = runCatching 
 
 fun writeBytes(context: Context, file: PlatformFile, bytes: ByteArray): Boolean = runCatching { file.writeBytes(bytes) }.isSuccess
 
+/** Swing's chooser follows the app's (Chinese) locale; the AWT/GTK dialog would follow the system language. */
+private fun chooser(title: String): JFileChooser {
+    systemLookAndFeel
+    return JFileChooser().apply { dialogTitle = title }
+}
+
+private val systemLookAndFeel by lazy { runCatching { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()) } }
+
 private fun saveDialog(title: String, suggested: String): File? {
-    val dialog = FileDialog(null as Frame?, title, FileDialog.SAVE).apply { file = suggested; isVisible = true }
-    return dialog.file?.let { File(dialog.directory, it) }
+    val dialog = chooser(title).apply { selectedFile = File(downloadsDir(), suggested) }
+    if (dialog.showSaveDialog(null) != JFileChooser.APPROVE_OPTION) return null
+    val file = dialog.selectedFile
+    val replace = !file.exists() || JOptionPane.showConfirmDialog(null, "「${file.name}」已存在，要替换吗？", title,
+        JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION
+    return file.takeIf { replace }
 }
 
 private fun openDialog(title: String, multiple: Boolean): List<File> {
-    val dialog = FileDialog(null as Frame?, title, FileDialog.LOAD).apply { isMultipleMode = multiple; isVisible = true }
-    return dialog.files.toList()
+    val dialog = chooser(title).apply { isMultiSelectionEnabled = multiple }
+    if (dialog.showOpenDialog(null) != JFileChooser.APPROVE_OPTION) return emptyList()
+    return if (multiple) dialog.selectedFiles.toList() else listOfNotNull(dialog.selectedFile)
 }
 
 /** Save dialog; [onResult] gets null when cancelled. Launch with the suggested file name. */
@@ -154,7 +170,7 @@ fun rememberPickImages(onResult: (List<PlatformFile>) -> Unit): () -> Unit {
 fun rememberPickDirectory(onResult: (String?) -> Unit): () -> Unit {
     val callback by rememberUpdatedState(onResult)
     return {
-        val chooser = JFileChooser().apply { fileSelectionMode = JFileChooser.DIRECTORIES_ONLY }
+        val chooser = chooser("选择文件夹").apply { fileSelectionMode = JFileChooser.DIRECTORIES_ONLY }
         callback(if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) chooser.selectedFile.path else null)
     }
 }

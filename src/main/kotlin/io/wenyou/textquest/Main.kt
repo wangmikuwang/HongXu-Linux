@@ -2,6 +2,12 @@ package io.wenyou.textquest
 
 import android.content.Context
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.window.WindowPlacement
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.WindowState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -14,6 +20,7 @@ import io.wenyou.textquest.platform.appContext
 import io.wenyou.textquest.platform.appIconPainter
 import io.wenyou.textquest.platform.openAsset
 import io.wenyou.textquest.ui.WenYouAppRoot
+import io.wenyou.textquest.ui.windowKeyHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -53,15 +60,33 @@ private fun offerArguments(args: Array<String>, container: WenYouApp.AppContaine
     }
 }
 
+private val windowPrefs by lazy { appContext.getSharedPreferences("window", Context.MODE_PRIVATE) }
+
+/** The window reopens where and how big the player left it. */
+private fun saveWindow(state: WindowState) {
+    val edit = windowPrefs.edit().putBoolean("maximized", state.placement == WindowPlacement.Maximized)
+    if (state.placement == WindowPlacement.Floating) {
+        edit.putInt("width", state.size.width.value.toInt()).putInt("height", state.size.height.value.toInt())
+        (state.position as? WindowPosition.Absolute)?.let { edit.putInt("x", it.x.value.toInt().coerceAtLeast(0)).putInt("y", it.y.value.toInt().coerceAtLeast(0)) }
+    }
+    edit.apply()
+}
+
 fun main(args: Array<String>) {
+    // Simplified Chinese throughout, including Java's own dialogs (see Theme.kt).
+    java.util.Locale.setDefault(java.util.Locale.SIMPLIFIED_CHINESE)
     appContext = Context(dataDirectory())
     val container = WenYouApp.AppContainer(appContext)
     installCrashLogger(container)
     CoroutineScope(SupervisorJob() + Dispatchers.IO).launch { container.seedLibrary { openAsset(appContext, it) } }
     offerArguments(args, container)
     application {
-        val window = rememberWindowState(width = 480.dp, height = 900.dp)
-        Window(onCloseRequest = ::exitApplication, state = window, title = BuildConfig.APP_NAME, icon = appIconPainter()) {
+        val window = rememberWindowState(placement = if (windowPrefs.getBoolean("maximized", false)) WindowPlacement.Maximized else WindowPlacement.Floating,
+            position = windowPrefs.getInt("x", -1).takeIf { it >= 0 }?.let { WindowPosition(it.dp, windowPrefs.getInt("y", 0).dp) } ?: WindowPosition(Alignment.Center),
+            size = DpSize(windowPrefs.getInt("width", 1120).dp, windowPrefs.getInt("height", 780).dp))
+        Window(onCloseRequest = { saveWindow(window); exitApplication() }, state = window, title = BuildConfig.APP_NAME, icon = appIconPainter(),
+            onKeyEvent = { windowKeyHandler(it) }) {
+            LaunchedEffect(Unit) { this@Window.window.minimumSize = java.awt.Dimension(400, 560) }
             val owner = remember { object : ViewModelStoreOwner { override val viewModelStore = ViewModelStore() } }
             CompositionLocalProvider(LocalViewModelStoreOwner provides owner) {
                 WenYouAppRoot(container, showStartup = true)

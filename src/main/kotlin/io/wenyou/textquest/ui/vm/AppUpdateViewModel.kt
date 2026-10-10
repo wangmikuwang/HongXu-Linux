@@ -8,6 +8,7 @@ import io.wenyou.textquest.data.UpdatePolicy
 import io.wenyou.textquest.data.isNewerVersion
 import io.wenyou.textquest.data.model.AppJson
 import io.wenyou.textquest.data.requiresAppUpdate
+import io.wenyou.textquest.platform.inFlatpak
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +27,7 @@ data class AppUpdateState(
     val busy: Boolean = false, val release: LinuxRelease? = null, val message: String = "",
     val policy: UpdatePolicy = UpdatePolicy(), val promptVisible: Boolean = false
 ) {
-    val required get() = requiresAppUpdate(BuildConfig.VERSION_CODE, BuildConfig.VERSION_NAME, policy)
+    val required get() = !inFlatpak && requiresAppUpdate(BuildConfig.VERSION_CODE, BuildConfig.VERSION_NAME, policy)
 }
 
 /** Finds newer releases; installing is done by the user's package manager from the release page. */
@@ -41,7 +42,7 @@ class AppUpdateViewModel : ViewModel() {
     fun resume() { if (!checked) check(automatic = true) }
 
     fun check(automatic: Boolean = false) {
-        if (state.value.busy) return
+        if (inFlatpak || state.value.busy) return
         checked = true
         state.value = state.value.copy(busy = true, message = "正在检查更新…")
         viewModelScope.launch {

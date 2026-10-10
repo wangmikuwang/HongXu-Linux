@@ -22,7 +22,17 @@
 - **Debian / Ubuntu**：`sudo apt install ./hongxu_<版本>_amd64.deb`
 - **Arch Linux**：`sudo pacman -U hongxu-<版本>-1-x86_64.pkg.tar.zst`，或从源码 `cd packaging/arch && makepkg -si`
 
-安装后在应用菜单的「游戏」中打开，或在终端运行 `hongxu`。资料保存在 `~/.local/share/hongxu`，不上传剧情、存档或 AI 服务密钥；升级时直接覆盖安装即可保留。
+安装后在应用菜单的「游戏」中打开「虹叙」（Arch 也可在终端运行 `hongxu`）。资料保存在 `~/.local/share/hongxu`，不上传剧情、存档或 AI 服务密钥；升级时直接覆盖安装即可保留。
+
+## 键盘与鼠标
+
+| 操作 | 作用 |
+| --- | --- |
+| Esc / 鼠标侧键「后退」 | 返回上一页 |
+| Enter / Shift+Enter | 发送行动 / 换行 |
+| Ctrl + = / Ctrl + - / Ctrl + 0 | 放大 / 缩小 / 恢复界面 |
+
+窗口较宽时左侧显示导航栏；窗口大小与位置会被记住。
 
 ## 从源码运行
 
@@ -42,4 +52,4 @@
 
 ## 许可
 
-本应用以 [GPL-3.0](LICENSE) 发布。随附组件：Ionicons（MIT）、霞鹜文楷精简子集「Bundled Kai」（SIL OFL 1.1）、Material Color Utilities（Apache-2.0），许可文本见 `src/main/resources/licenses/` 与 `third_party/`。
+本应用以 [GPL-3.0](LICENSE) 发布。随附组件：Ionicons（MIT）、霞鹜文楷精简子集「Bundled Kai」（SIL OFL 1.1）、Noto Color Emoji（SIL OFL 1.1）、Material Color Utilities（Apache-2.0），许可文本见 `src/main/resources/licenses/` 与 `third_party/`。

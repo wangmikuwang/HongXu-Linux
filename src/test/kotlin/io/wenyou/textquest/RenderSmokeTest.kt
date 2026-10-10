@@ -59,6 +59,8 @@ class RenderSmokeTest {
 
         // The UI thread on the desktop is the Swing event thread; navigation checks for it.
         runBlocking(Dispatchers.Main) { renderHome(container, "home.png") }
+        // Desktop window size: navigation rail and centred content instead of the phone layout.
+        runBlocking(Dispatchers.Main) { render("home-wide.png", 1120, 780) { WenYouAppRoot(container) } }
         container.settings.setThemeStyle(ThemeStyle.APPLE)
         runBlocking(Dispatchers.Main) { renderHome(container, "home-glass.png") }
     }
@@ -104,8 +106,8 @@ class RenderSmokeTest {
 
     private fun renderHome(container: WenYouApp.AppContainer, name: String) = render(name) { WenYouAppRoot(container) }
 
-    private fun render(name: String, content: @Composable () -> Unit) {
-        val scene = ImageComposeScene(480, 900, Density(1f)) {
+    private fun render(name: String, width: Int = 480, height: Int = 900, content: @Composable () -> Unit) {
+        val scene = ImageComposeScene(width, height, Density(1f)) {
             val owner = remember { TestOwner() }
             CompositionLocalProvider(LocalViewModelStoreOwner provides owner, LocalLifecycleOwner provides owner, content = content)
         }

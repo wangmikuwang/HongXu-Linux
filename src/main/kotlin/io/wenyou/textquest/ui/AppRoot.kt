@@ -65,6 +65,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
+import androidx.savedstate.read
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -145,6 +146,7 @@ fun WenYouAppRoot(container: WenYouApp.AppContainer, updateVm: AppUpdateViewMode
             }
             val dockPosition = animateFloatAsState(dockIndex.toFloat(), AppMotion.selection(), label = "navigation-lens")
             CompositionLocalProvider(LocalDockPosition provides dockPosition, LocalPrideGalleryOpen provides { nav.navigate(R.PRIDE) { launchSingleTop = true } }) {
+                DesktopFrame(nav, container.settings) {
                 NavHost(navController = nav, startDestination = R.HOME,
                     enterTransition = {
                         if (initialState.destination.route in R.HUBS && targetState.destination.route in R.HUBS) fadeIn(AppMotion.fade())
@@ -169,7 +171,7 @@ fun WenYouAppRoot(container: WenYouApp.AppContainer, updateVm: AppUpdateViewMode
                         R.STORY_EDIT,
                         arguments = listOf(navArgument(R.ARG_STORY) { type = NavType.StringType })
                     ) { entry ->
-                        val id = entry.arguments?.getString(R.ARG_STORY) ?: "new"
+                        val id = entry.arguments?.read { getStringOrNull(R.ARG_STORY) } ?: "new"
                         StoryEditScreen(container, nav, storyId = id)
                     }
                     composable(R.CREATE) { io.wenyou.textquest.ui.screens.CreationHubScreen(container, nav) }
@@ -178,7 +180,7 @@ fun WenYouAppRoot(container: WenYouApp.AppContainer, updateVm: AppUpdateViewMode
                         R.CHAR_EDIT,
                         arguments = listOf(navArgument(R.ARG_CHAR) { type = NavType.StringType })
                     ) { entry ->
-                        val id = entry.arguments?.getString(R.ARG_CHAR) ?: "new"
+                        val id = entry.arguments?.read { getStringOrNull(R.ARG_CHAR) } ?: "new"
                         CharacterEditScreen(container, nav, charId = id)
                     }
                     composable(R.PROVIDERS) { ProvidersScreen(container, nav) }
@@ -186,12 +188,12 @@ fun WenYouAppRoot(container: WenYouApp.AppContainer, updateVm: AppUpdateViewMode
                         R.PROVIDER_EDIT,
                         arguments = listOf(navArgument(R.ARG_PROVIDER) { type = NavType.StringType })
                     ) { entry ->
-                        val id = entry.arguments?.getString(R.ARG_PROVIDER) ?: "new"
+                        val id = entry.arguments?.read { getStringOrNull(R.ARG_PROVIDER) } ?: "new"
                         ProviderEditScreen(container, nav, providerId = id)
                     }
                     composable(R.SETTINGS) { SettingsScreen(container, nav, updateVm) }
                     composable(R.SETTINGS_DETAIL, arguments = listOf(navArgument("category") { type = NavType.StringType })) { entry ->
-                        SettingsScreen(container, nav, updateVm, category = entry.arguments?.getString("category") ?: "system")
+                        SettingsScreen(container, nav, updateVm, category = entry.arguments?.read { getStringOrNull("category") } ?: "system")
                     }
                     composable(R.APPEARANCE) { io.wenyou.textquest.ui.screens.AppearanceScreen(container, nav) }
                     composable(R.PRIDE) {
@@ -206,10 +208,11 @@ fun WenYouAppRoot(container: WenYouApp.AppContainer, updateVm: AppUpdateViewMode
                             navArgument(R.ARG_SAVE) { type = NavType.StringType }
                         )
                     ) { entry ->
-                        val storyId = entry.arguments?.getString(R.ARG_STORY).orEmpty()
-                        val saveId = entry.arguments?.getString(R.ARG_SAVE) ?: "new"
+                        val storyId = entry.arguments?.read { getStringOrNull(R.ARG_STORY) }.orEmpty()
+                        val saveId = entry.arguments?.read { getStringOrNull(R.ARG_SAVE) } ?: "new"
                         PlayScreen(container, nav, storyId = storyId, saveId = saveId)
                     }
+                }
                 }
             }
         }
@@ -224,22 +227,8 @@ fun WenYouAppRoot(container: WenYouApp.AppContainer, updateVm: AppUpdateViewMode
 fun HubBottomBar(nav: NavHostController) {
     val backStack by nav.currentBackStackEntryAsState()
     val current = backStack?.destination?.route
-    val items = listOf(
-        HubItem(R.HOME, "主页", AppIcons.Home),
-        HubItem(R.STORIES, "剧情", AppIcons.List),
-        HubItem(R.CREATE, "创建", AppIcons.Add),
-        HubItem(R.CHARACTERS, "角色", AppIcons.Person),
-        HubItem(R.SETTINGS, "设置", AppIcons.Settings)
-    )
-    fun selectRoute(index: Int) {
-        val route = items[index].route
-        if (current == route) return
-        nav.navigate(route) {
-            popUpTo(nav.graph.findStartDestination().id) { saveState = true }
-            launchSingleTop = true
-            restoreState = true
-        }
-    }
+    val items = hubItems
+    fun selectRoute(index: Int) = navigateHub(nav, items[index].route, current)
     if (LocalGlassEnabled.current) {
         GlassDock(items.map { DockItem(it.label, it.icon) },
             items.indexOfFirst { it.route == current }.coerceAtLeast(0), ::selectRoute)
@@ -272,7 +261,10 @@ fun HubScaffold(
     nav: NavHostController,
     content: @Composable (androidx.compose.foundation.layout.PaddingValues) -> Unit
 ) {
-    if (LocalGlassEnabled.current) {
+    if (LocalWideLayout.current) {
+        // Wide windows navigate with the rail (DesktopFrame), so hub pages have no bottom dock.
+        Scaffold(topBar = topBar) { padding -> content(padding) }
+    } else if (LocalGlassEnabled.current) {
         val density = LocalDensity.current
         var barHeight by remember { mutableStateOf(112.dp) }
         GlassBackdrop(
@@ -292,4 +284,22 @@ fun HubScaffold(
     }
 }
 
-private data class HubItem(val route: String, val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector)
+internal data class HubItem(val route: String, val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector)
+
+internal val hubItems = listOf(
+    HubItem(R.HOME, "主页", AppIcons.Home),
+    HubItem(R.STORIES, "剧情", AppIcons.List),
+    HubItem(R.CREATE, "创建", AppIcons.Add),
+    HubItem(R.CHARACTERS, "角色", AppIcons.Person),
+    HubItem(R.SETTINGS, "设置", AppIcons.Settings)
+)
+
+/** Switches hub tabs, keeping each tab's own back stack. */
+internal fun navigateHub(nav: NavHostController, route: String, current: String?) {
+    if (current == route) return
+    nav.navigate(route) {
+        popUpTo(nav.graph.findStartDestination().id) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
