@@ -11,6 +11,7 @@
 [![最新版本](https://img.shields.io/github/v/release/wangmikuwang/HongXu-Linux?label=%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC)](https://github.com/wangmikuwang/HongXu-Linux/releases/latest)
 ![Debian](https://img.shields.io/badge/Debian-.deb-A81D33?logo=debian&logoColor=white)
 ![Arch Linux](https://img.shields.io/badge/Arch%20Linux-PKGBUILD-1793D1?logo=archlinux&logoColor=white)
+![Flatpak](https://img.shields.io/badge/Flatpak-%E8%87%AA%E5%BB%BA%E8%BD%AF%E4%BB%B6%E6%BA%90-4A90D9?logo=flatpak&logoColor=white)
 [![GPL-3.0](https://img.shields.io/badge/%E8%AE%B8%E5%8F%AF%E8%AF%81-GPL--3.0-blue)](LICENSE)
 
 </div>
@@ -21,6 +22,7 @@
 
 - **Debian / Ubuntu**：`sudo apt install ./hongxu_<版本>_amd64.deb`
 - **Arch Linux**：`sudo pacman -U hongxu-<版本>-1-x86_64.pkg.tar.zst`，或从源码 `cd packaging/arch && makepkg -si`
+- **Flatpak（任意发行版）**：`flatpak install --user https://wangmikuwang.github.io/flatpak/hongxu.flatpakref`，之后用 `flatpak update` 升级；运行环境自动从 Flathub 获取。也可下载发布页面的 `hongxu-<版本>.flatpak` 后 `flatpak install --user ./hongxu-<版本>.flatpak`。Flatpak 版资料保存在 `~/.var/app/io.github.wangmikuwang.HongXu-Linux`。
 
 安装后在应用菜单的「游戏」中打开「虹叙」（Arch 也可在终端运行 `hongxu`）。资料保存在 `~/.local/share/hongxu`，不上传剧情、存档或 AI 服务密钥；升级时直接覆盖安装即可保留。
 
