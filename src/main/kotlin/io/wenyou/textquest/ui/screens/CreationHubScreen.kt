@@ -36,7 +36,7 @@ fun CreationHubScreen(container: WenYouApp.AppContainer, nav: NavHostController)
 internal fun CreationHubContent(onStory: () -> Unit, onCharacter: () -> Unit, onAi: () -> Unit, modifier: Modifier = Modifier) {
     Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).testTag("creation-hub"),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text("选择创建方式", style = MaterialTheme.typography.titleMedium)
+        io.wenyou.textquest.ui.common.SectionHeader("选择创建方式")
         TonalCard {
             Text("手动创建", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(16.dp))

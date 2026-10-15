@@ -120,7 +120,7 @@ fun Pill(text: String, modifier: Modifier = Modifier, container: Color? = null, 
             maxLines = 2, overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.labelMedium,
             color = if (container == null) MaterialTheme.colorScheme.onSurfaceVariant else if (LocalAccentPalette.current.isNotEmpty()) accentForeground(fill!!) else contentColorFor(container),
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
         )
     }
 }
@@ -168,7 +168,7 @@ fun SwitchRow(
     modifier: Modifier = Modifier
 ) {
     Row(
-        modifier.fillMaxWidth().padding(vertical = 6.dp),
+        modifier.fillMaxWidth().padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(Modifier.weight(1f)) {
@@ -333,7 +333,7 @@ fun ColorDots(
 @Composable
 fun SearchField(query: String, onQueryChange: (String) -> Unit, placeholder: String, modifier: Modifier = Modifier) {
     OutlinedTextField(query, onQueryChange, modifier = modifier.fillMaxWidth(),
-        singleLine = true, shape = RoundedCornerShape(16.dp),
+        singleLine = true, shape = MaterialTheme.shapes.medium,
         placeholder = { Text(placeholder) },
         leadingIcon = { AppIcon(AppIcons.Search, "搜索") },
         trailingIcon = if (query.isNotEmpty()) {{ IconButton(onClick = { onQueryChange("") }) { AppIcon(AppIcons.Close, "清除搜索") } }} else null,

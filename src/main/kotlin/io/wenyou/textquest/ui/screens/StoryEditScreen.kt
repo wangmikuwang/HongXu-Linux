@@ -136,8 +136,8 @@ fun StoryEditScreen(container: WenYouApp.AppContainer, nav: NavHostController, s
         LazyColumn(
             state = listState,
             modifier = Modifier.padding(padding).fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (ui.message.isNotBlank()) {
                 item {
@@ -276,7 +276,7 @@ fun StoryEditScreen(container: WenYouApp.AppContainer, nav: NavHostController, s
                         val node = story.nodes[id]
                         val selected = id == ui.selectedNodeId
                         Card(
-                            shape = RoundedCornerShape(12.dp),
+                            shape = MaterialTheme.shapes.medium,
                             colors = CardDefaults.cardColors(
                                 containerColor = if (selected) MaterialTheme.colorScheme.secondaryContainer
                                 else MaterialTheme.colorScheme.surfaceContainerHighest
@@ -284,7 +284,7 @@ fun StoryEditScreen(container: WenYouApp.AppContainer, nav: NavHostController, s
                             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                         ) {
                             Row(
-                                Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 io.wenyou.textquest.ui.common.RawText(KIND_META[node?.kind] ?: "•", style = MaterialTheme.typography.titleMedium)
@@ -307,7 +307,7 @@ fun StoryEditScreen(container: WenYouApp.AppContainer, nav: NavHostController, s
                             }
                         }
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(top = 8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
                         Button(onClick = { vm.addNode() }, modifier = Modifier.weight(1f)) {
                             Icon(AppIcons.Add, null); Spacer(Modifier.width(6.dp)); Text("新增节点")
                         }
@@ -443,9 +443,9 @@ private fun ChoiceEditor(
     vm: StoryEditorViewModel
 ) {
     Card(
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
     ) {
         Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -640,7 +640,7 @@ private fun VariableRows(
 @Composable
 private fun FlagRows(flags: Set<String>, onAdd: (String) -> Unit, onRemove: (String) -> Unit) {
     var newFlag by remember { mutableStateOf("") }
-    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         flags.forEach { f ->
             AssistChip(
                 onClick = { onRemove(f) },

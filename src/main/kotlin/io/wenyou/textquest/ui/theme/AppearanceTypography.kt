@@ -11,7 +11,13 @@ import androidx.compose.ui.text.platform.Font
 import io.wenyou.textquest.data.AppearanceFiles
 import java.io.File
 
-internal val DefaultAppFont = FontFamily(Font("bundled_kai_regular.ttf"))
+/** LXGW WenKai, both weights unmodified: Regular for body text, the real Medium for medium, semibold and bold text. */
+internal val DefaultAppFont = FontFamily(
+    Font("lxgw_wenkai_regular.ttf", androidx.compose.ui.text.font.FontWeight.Normal),
+    Font("lxgw_wenkai_medium.ttf", androidx.compose.ui.text.font.FontWeight.Medium),
+    Font("lxgw_wenkai_medium.ttf", androidx.compose.ui.text.font.FontWeight.SemiBold),
+    Font("lxgw_wenkai_medium.ttf", androidx.compose.ui.text.font.FontWeight.Bold),
+)
 
 // Many Linux systems have no colour emoji font, and story covers and messages use emoji, so one is bundled.
 private val EmojiFontFamily = FontFamily(Font("NotoColorEmoji.ttf"))

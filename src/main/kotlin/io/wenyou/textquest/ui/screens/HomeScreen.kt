@@ -243,7 +243,7 @@ private fun ContinueCard(card: HomeCard, accentIndex: Int, onClick: () -> Unit, 
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
                 Modifier
                     .width(52.dp).height(52.dp)
@@ -259,7 +259,7 @@ private fun ContinueCard(card: HomeCard, accentIndex: Int, onClick: () -> Unit, 
                     style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(4.dp))
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Pill(card.stepText)
                     if (story?.mode != null && story.mode.label.isNotEmpty()) {
                         Pill(story.mode.label, container = MaterialTheme.colorScheme.tertiaryContainer, accentIndex = accentIndex)

@@ -93,7 +93,7 @@ fun ProviderEditScreen(container: WenYouApp.AppContainer, nav: NavHostController
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (ui.message.isNotBlank()) {
                 item {
@@ -174,7 +174,7 @@ fun ProviderEditScreen(container: WenYouApp.AppContainer, nav: NavHostController
             }
             item { Spacer(Modifier.height(4.dp)) }
             item {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     AppOutlinedButton(
                         onClick = { vm.test() },
                         enabled = !ui.testing,

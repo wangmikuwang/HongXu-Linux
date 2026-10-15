@@ -227,7 +227,7 @@ class AiDirector(private val client: ChatClient) {
             val st = state.characterStates[c.id] ?: continue
             val ms = CharacterMetrics.defs.mapNotNull { d ->
                 val v = st.metrics[d.key]
-                if (v != null) "${d.icon}${d.label}${GameEngine.formatNumber(CharacterMetrics.clamp(v))}" else null
+                if (v != null) "${d.icon}${d.label}${GameEngine.formatNumber(CharacterMetrics.clamp(v))}（${metricMeaning(d.key, v)}）" else null
             }
             append("· ${c.name}：").append(if (ms.isNotEmpty()) ms.joinToString("　") else "（无）")
             if (st.flags.isNotEmpty()) append("　标记：${st.flags.joinToString("、")}")
@@ -238,7 +238,20 @@ class AiDirector(private val client: ChatClient) {
             }
             append("\n")
         }
-        append("（请让角色言行贴合以上状态。）\n")
+    }
+
+    /**
+     * Binds the next lines to the states above and the states to what happens: the last thing the model reads each turn.
+     * Characters the player set by hand are played as set, without the story explaining the change.
+     */
+    private fun stateBinding(story: Story, characters: List<CharacterData>, state: SessionState): String {
+        val bound = characters.filter { it.id in story.characterIds && it.id != state.playerCharacterId && state.characterStates[it.id] != null }
+        if (bound.isEmpty()) return ""
+        val manual = bound.filter { state.characterStates[it.id]?.lastChangeReason == MANUAL_STATE_REASON }.map { it.name }
+        return "\n【角色状态约束】角色的台词、语气、动作和决定必须与【角色当前状态】一致：好感或信任低时不会突然亲近、示好或吐露秘密，" +
+            "高时自然流露在意；心情、精力、疲劳与身体状况决定语气和能做到的事，受伤或疲惫时行动受限；标记是已发生的事实，穿着外观保持一致，除非剧情明确改变。" +
+            "状态只随本轮剧情逐步变化：本轮互动明显影响了某个角色时，必须在 state 中写出相应变化并附 reason，单项每轮变化不超过 ±$MAX_STATE_STEP；没有影响就不要改。\n" +
+            (if (manual.isEmpty()) "" else "玩家手动设定了「${manual.joinToString("、")}」的状态：直接按设定演绎，不要在剧情中解释或提及这次调整。\n")
     }
 
     /** 取最近若干条剧情（角色台词/旁白/玩家选择），组成用户消息正文。 */
@@ -298,7 +311,8 @@ class AiDirector(private val client: ChatClient) {
                 append("默认每个选项都让场景自然延续。\n")
             }
         }
-        val user = contextTail(story, state) + stateSnapshot(state) + charStatesSnapshot(story, characters, state) + scaleNote(adult) + paceNote(state) + identityNote(state, characters)
+        val user = contextTail(story, state) + stateSnapshot(state) + charStatesSnapshot(story, characters, state) + scaleNote(adult) + paceNote(state) +
+            stateBinding(story, characters, state) + identityNote(state, characters)
         return requestScene(profile, system, user, sceneOptions(profile), onDelta, onReasoning)
     }
 
@@ -331,7 +345,8 @@ class AiDirector(private val client: ChatClient) {
             append(outputRules("这段互动"))
             append("choices 必须提供 2-4 个玩家下一步可以采取的行动或台词，不能替玩家实施。只有玩家明确表达收尾意愿且剧情已经结束时，才能设置 ended:true 并让 choices 为空数组；其他情况 ended:false。\n")
         }
-        val user = contextTail(story, state, playerText) + stateSnapshot(state) + charStatesSnapshot(story, characters, state) + scaleNote(adult) + paceNote(state) + identityNote(state, characters)
+        val user = contextTail(story, state, playerText) + stateSnapshot(state) + charStatesSnapshot(story, characters, state) + scaleNote(adult) + paceNote(state) +
+            stateBinding(story, characters, state) + identityNote(state, characters)
         return requestScene(profile, system, user, sceneOptions(profile), onDelta, onReasoning, requireChoices = true)
     }
 
@@ -343,7 +358,7 @@ class AiDirector(private val client: ChatClient) {
         "正文与选项均为纯文本：不要使用 markdown 语法（如 **加粗**、- 列表、# 标题、*斜体*、> 引用、``` 代码块）；不要输出任何思考、概要、计划、总结或导演式旁白。\n" +
         "JSON 必须补充 memory 字段：用 600 字以内更新累计剧情记忆，保留旧记忆中关键事件、承诺、线索及玩家选择，仅记已发生事实，不记推测与思考。可补充 relationships:[{from:角色id,to:另一个角色id,description:当前关系,reason:本轮变化原因}]，仅列发生变化的有方向关系，不虚构变化；state 每项可附 reason 解释原因。上述字段使用标准 JSON 双引号。\n" +
         "若有可选的构思/计划，把它放进思考过程（reasoning_content），不要出现在正文。\n" +
-        "可选地在 JSON 中加入 \"state\":[{\"char\":\"角色id\",\"metric\":\"情感指标key\",\"delta\":数值},{\"char\":\"角色id\",\"flag\":\"新标记\"},{\"char\":\"角色id\",\"desc\":\"穿着/外观描述\"}]，给出${scope}造成的角色状态变化（数值在 0-100 内，只列有意义的变化）。指标 key：affection/trust/mood/energy/health/fatigue/arousal。\n"
+        "本轮互动影响到角色时在 JSON 中加入 \"state\":[{\"char\":\"角色id\",\"metric\":\"情感指标key\",\"delta\":数值},{\"char\":\"角色id\",\"flag\":\"新标记\"},{\"char\":\"角色id\",\"desc\":\"穿着/外观描述\"}]，给出${scope}造成的角色状态变化（delta 为本轮增减量，单项不超过 ±$MAX_STATE_STEP，只列确实发生的变化，没有就省略 state）。指标 key：affection/trust/mood/energy/health/fatigue/arousal。\n"
 
     /**
      * Scenes take the service's creativity setting, capped where long JSON stays well formed, and an output cap that
@@ -514,6 +529,10 @@ class AiDirector(private val client: ChatClient) {
     }
 
     companion object {
+        /** Largest change one AI turn may make to a single value; larger requests are cut to it. */
+        const val MAX_STATE_STEP = 20
+        /** Reason recorded when the player sets a state by hand in the console. */
+        const val MANUAL_STATE_REASON = "玩家手动调整"
         private const val SCENE_MAX_TOKENS = 4096
         const val RECAP_LIMIT = 3000
         fun errorMessage(t: Throwable): String = when (t) {
@@ -561,3 +580,17 @@ internal fun AiScene.withContinuity(state: SessionState, castIds: Set<String>): 
     }
     return state.copy(memory = memory.trim().take(2000).ifBlank { state.memory }, characterStates = states)
 }
+
+/** What a 0–100 value means for behaviour, in five bands; the prompt shows it beside each number. */
+private val METRIC_BANDS = mapOf(
+    "affection" to listOf("反感、冷淡", "疏离、客气", "友善、普通", "亲近、在意", "深深依恋"),
+    "trust" to listOf("戒备、怀疑", "有所保留", "一般信任", "信赖", "完全信赖、愿意托付秘密"),
+    "mood" to listOf("低落或烦躁", "情绪欠佳", "平静", "愉快", "兴奋、非常开心"),
+    "energy" to listOf("精疲力竭", "疲惫", "一般", "精神不错", "精力充沛"),
+    "health" to listOf("重伤或重病，行动严重受限", "受伤或不适", "有些不适", "基本健康", "健康"),
+    "fatigue" to listOf("精神饱满", "略有倦意", "疲倦", "很累", "极度疲劳"),
+    "arousal" to listOf("没有暧昧气氛", "淡淡的暧昧", "暧昧", "强烈的吸引", "亲密氛围浓厚"),
+)
+
+internal fun metricMeaning(key: String, value: Double): String =
+    METRIC_BANDS[key]?.get((CharacterMetrics.clamp(value) / 20).toInt().coerceAtMost(4)).orEmpty()

@@ -155,7 +155,7 @@ fun StoryListScreen(container: WenYouApp.AppContainer, nav: NavHostController) {
         Box(Modifier.padding(padding).fillMaxSize()) {
             LazyColumn(
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 item { SearchField(query, { query = it }, "搜索剧情名、简介或题材", Modifier.testTag("story-search")) }
                 item {
@@ -304,7 +304,7 @@ fun SharePickDialog(title: String, onLink: () -> Unit, onFile: () -> Unit, onCod
 
 @Composable
 private fun ShareOption(icon: String, title: String, body: String, onClick: () -> Unit) {
-    Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(RoundedCornerShape(14.dp)).clickable(onClick = onClick).padding(horizontal = 8.dp, vertical = 10.dp),
+    Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(MaterialTheme.shapes.medium).clickable(onClick = onClick).padding(horizontal = 8.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically) {
         io.wenyou.textquest.ui.common.RawText(icon, fontSize = 22.sp)
         Spacer(Modifier.width(14.dp))
@@ -376,10 +376,10 @@ fun ShareTextDialog(title: String, code: String, onDismiss: () -> Unit) {
 @Composable
 private fun QrCard(bitmap: androidx.compose.ui.graphics.ImageBitmap, dp: Int, modifier: Modifier = Modifier) {
     Surface(
-        shape = RoundedCornerShape(18.dp),
+        shape = MaterialTheme.shapes.medium,
         color = Color.White,
         shadowElevation = 3.dp,
-        modifier = modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(18.dp))
+        modifier = modifier.border(2.dp, MaterialTheme.colorScheme.primary, MaterialTheme.shapes.medium)
     ) {
         Image(
             bitmap = bitmap,
@@ -439,7 +439,7 @@ fun ShareQrDialog(title: String, code: String, onDismiss: () -> Unit) {
                         val qr = remember(pages[idx]) { QrCode.encodeImage(pages[idx], 640) }
                         if (pages.size > 1) Text("第 ${idx + 1}/${pages.size} 张", style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        if (qr != null) QrCard(qr, 260, Modifier.padding(top = 6.dp))
+                        if (qr != null) QrCard(qr, 260, Modifier.padding(top = 8.dp))
                     }
                     if (pages.size > 1) IconButton(onClick = { idx = (idx + 1) % pages.size }) {
                         Icon(AppIcons.KeyboardArrowRight, "下一张", tint = MaterialTheme.colorScheme.readableAccent())
@@ -608,7 +608,7 @@ private fun SavesDialog(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             } else {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     saves.forEach { slot ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f).clickable { onLoad(slot) }) {
@@ -647,7 +647,7 @@ private fun StoryCard(story: Story, onEdit: () -> Unit, onPlay: () -> Unit, onSa
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
     ) {
-        Column(Modifier.fillMaxWidth().padding(14.dp)) {
+        Column(Modifier.fillMaxWidth().padding(16.dp)) {
             Row(verticalAlignment = Alignment.Top) {
                 EmojiBadge(story.coverEmoji, color, size = 54.dp)
                 Spacer(Modifier.width(12.dp))
@@ -682,11 +682,11 @@ private fun StoryCard(story: Story, onEdit: () -> Unit, onPlay: () -> Unit, onSa
                 Spacer(Modifier.height(10.dp))
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     FlowRow(
                         modifier = Modifier.fillMaxWidth().testTag("story-markers-${story.id}"),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Pill(modeText, container = MaterialTheme.colorScheme.secondaryContainer)
                         if (story.lgbt) Pill(ContentClass.LGBT.label,

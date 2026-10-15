@@ -53,7 +53,7 @@ fun WhatsNewCard(earlier: Int = 3) {
         Text("更新内容", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(6.dp))
         val shown = if (showEarlier) notes.take(1 + earlier) else notes.take(1)
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             shown.forEach { release ->
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     val current = release.version == BuildConfig.VERSION_NAME.substringBefore('-')

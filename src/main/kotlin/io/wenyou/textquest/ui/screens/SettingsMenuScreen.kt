@@ -41,9 +41,7 @@ internal val settingsSections = listOf(
 @Composable
 internal fun SettingsMenuScreen(nav: NavHostController) {
     HubScaffold(topBar = {
-        TopAppBar(title = { AppText("设置", fontWeight = FontWeight.SemiBold) }, navigationIcon = {
-            IconButton(onClick = { nav.navigateUp() }) { Icon(AppIcons.ArrowBack, "返回") }
-        })
+        CenterAlignedTopAppBar(title = { AppText("设置") })
     }, nav = nav) { padding ->
         SettingsMenuContent({ section -> nav.navigate(if (section == "appearance") R.APPEARANCE else R.settingsDetail(section)) }, Modifier.padding(padding))
     }

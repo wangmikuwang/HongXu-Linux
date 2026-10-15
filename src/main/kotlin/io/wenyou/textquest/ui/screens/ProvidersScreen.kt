@@ -143,7 +143,7 @@ private fun ProviderCard(
         ),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     io.wenyou.textquest.ui.common.RawText(profile.name, style = MaterialTheme.typography.titleMedium)

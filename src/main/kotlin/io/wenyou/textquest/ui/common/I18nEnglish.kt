@@ -234,7 +234,7 @@ private fun english1(m: MutableMap<String, String>) {
     m["内容过长：请缩短描述后重试"] = "The content is too long: shorten it and try again"
     m["内容：{0}"] = "Content: {0}"
     m["内置壁纸或相册图片"] = "Built-in wallpaper or a photo"
-    m["内置楷体"] = "Bundled Kai"
+    m["霞鹜文楷"] = "LXGW WenKai"
     m["再来一次"] = "Play again"
     m["写下你的行动，或让导演继续"] = "Write your action, or let the director continue"
     m["写你的身份/世界观/说话风格……会放到该角色人设最前，供 AI 优先参考。"] = "Describe your identity, world and speaking style… This goes first in the character's persona for the AI to prioritise."

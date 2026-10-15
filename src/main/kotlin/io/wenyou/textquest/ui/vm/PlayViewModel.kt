@@ -419,10 +419,12 @@ class PlayViewModel internal constructor(
             var desc = st.description
             if (CharacterMetrics.byKey(c.metric) != null && c.delta.isFinite() && c.delta != 0.0) {
                 val ov = metrics[c.metric] ?: 0.0
-                val nv = CharacterMetrics.clamp(ov + c.delta)
+                // One turn moves a value gradually; a model asking for a leap gets the largest allowed step.
+                val step = c.delta.coerceIn(-AiDirector.MAX_STATE_STEP.toDouble(), AiDirector.MAX_STATE_STEP.toDouble())
+                val nv = CharacterMetrics.clamp(ov + step)
                 if (nv != ov) {
                     metrics = metrics + (c.metric to nv)
-                    val sign = if (c.delta > 0) "+" else ""
+                    val sign = if (step > 0) "+" else ""
                     parts += "${CharacterMetrics.icon(c.metric)}${char.name} ${CharacterMetrics.label(c.metric)}$sign${GameEngine.formatNumber(nv - ov)}"
                 }
             }
@@ -626,7 +628,7 @@ class PlayViewModel internal constructor(
         val clean = state.copy(
             metrics = state.metrics.filterKeys { CharacterMetrics.byKey(it) != null }.mapValues { CharacterMetrics.clamp(it.value) },
             flags = state.flags.map { it.trim().take(120) }.filter { it.isNotEmpty() }.take(100).toSet(),
-            description = state.description.trim().take(1000))
+            description = state.description.trim().take(1000), lastChangeReason = AiDirector.MANUAL_STATE_REASON)
         session = s.copy(characterStates = s.characterStates + (charId to clean), updatedAt = System.currentTimeMillis())
     }
 

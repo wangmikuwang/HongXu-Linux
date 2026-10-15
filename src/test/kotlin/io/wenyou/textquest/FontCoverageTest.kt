@@ -6,10 +6,10 @@ import org.junit.Test
 import java.io.File
 import java.nio.ByteBuffer
 
-/** The bundled font is the Android app's subset (HongXu/third_party/lxgw-wenkai/subset.py); this edition's own text must never fall outside it. */
+/** The bundled LXGW WenKai weights are the complete, unmodified fonts (same files as the Android app), covering all of this edition's text. */
 class FontCoverageTest {
     private val app = File(".")
-    private val fontFile = File(app, "src/main/resources/bundled_kai_regular.ttf")
+    private val fonts = listOf("lxgw_wenkai_regular.ttf", "lxgw_wenkai_medium.ttf").map { File(app, "src/main/resources/$it") }
 
     /** Code points mapped by the font's format 12 (full Unicode) cmap subtable. */
     private fun coverage(font: ByteBuffer): Set<Int> {
@@ -28,22 +28,24 @@ class FontCoverageTest {
         it in 0x3400..0x9FFF || it in 0xF900..0xFAFF || it in 0xAC00..0xD7AF || it >= 0x20000
     }
 
-    @Test fun everyIdeographInTheAppsOwnTextIsInTheBundledFont() {
-        val covered = coverage(ByteBuffer.wrap(fontFile.readBytes()))
+    @Test fun everyIdeographInTheAppsOwnTextIsInBothWeights() {
         val sources = File(app, "src/main").walkTopDown().filter { f ->
             f.isFile && (f.extension == "kt" || f.extension == "md" || f.extension == "json" ||
                 (f.name == "strings.xml" && f.parentFile?.name?.startsWith("values") == true))
         }
-        val missing = sources.flatMap { ideographs(it.readText()) }.toSet() - covered
-        assertEquals("Add these to the Android app's font subset (third_party/lxgw-wenkai/subset.py), then sync: " + missing.joinToString("") { String(Character.toChars(it)) },
-            emptySet<Int>(), missing)
-        assertTrue("Common simplified and traditional characters", "的一是了我你他她们说这那剧情角色導演選擇A，。".codePoints().allMatch { it in covered })
-        assertTrue("Rare ideographs are left to the system font", 0x20000 !in covered)
+        val used = sources.flatMap { ideographs(it.readText()) }.toSet()
+        for (font in fonts) {
+            val covered = coverage(ByteBuffer.wrap(font.readBytes()))
+            assertEquals("${font.name} lacks: " + (used - covered).joinToString("") { String(Character.toChars(it)) }, emptySet<Int>(), used - covered)
+            // The complete font has about 30,000 ideographs, beyond GB2312/Big5 and into Extension B (e.g. U+2000B).
+            assertTrue("${font.name} is complete, rare ideographs included", covered.count { ideographs(String(Character.toChars(it))).isNotEmpty() } > 30_000 &&
+                0x2000B in covered && "導演選擇".codePoints().allMatch { it in covered })
+        }
     }
 
-    @Test fun theBundledFontIsTheRenamedSubset() {
-        assertTrue("Bundled font should be the ~6 MB subset", fontFile.length() < 10_000_000)
-        assertTrue("OFL reserved names must not be used by the modified font",
-            String(fontFile.readBytes(), Charsets.UTF_16BE).contains("Bundled Kai"))
+    @Test fun bundledWeightsAreTheUnmodifiedOriginals() {
+        // Unmodified copies keep the original family name; any change would make them Modified Versions under the OFL.
+        for (font in fonts) assertTrue("${font.name} keeps the original LXGW WenKai name",
+            String(font.readBytes(), Charsets.UTF_16BE).contains("LXGW WenKai"))
     }
 }

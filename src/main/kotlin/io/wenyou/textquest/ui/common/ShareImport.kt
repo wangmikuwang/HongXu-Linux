@@ -82,7 +82,7 @@ fun SharedImportHost(container: WenYouApp.AppContainer) {
         onDismissRequest = { if (!importing) dismiss() },
         title = { Text("导入分享内容") },
         text = {
-            Column(Modifier.heightIn(max = 360.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(Modifier.heightIn(max = 360.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 bundle.stories.forEach { s ->
                     RawText("${s.coverEmoji} ${s.title}" + if (s.id in storyIds) "（已有）" else "", style = MaterialTheme.typography.bodyLarge)
                 }

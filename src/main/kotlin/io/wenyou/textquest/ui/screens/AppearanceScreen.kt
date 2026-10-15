@@ -1,6 +1,7 @@
 @file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 package io.wenyou.textquest.ui.screens
 
+import io.wenyou.textquest.ui.common.AppTextButton
 import io.wenyou.textquest.ui.common.AppIcons
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -67,7 +68,7 @@ fun AppearanceScreen(container: WenYouApp.AppContainer, nav: NavHostController) 
         }
     }
     Scaffold(topBar = {
-        TopAppBar(title = { Text("外观与主题") }, navigationIcon = {
+        CenterAlignedTopAppBar(title = { Text("外观与主题") }, navigationIcon = {
             IconButton(onClick = { nav.popBackStack() }) { Icon(AppIcons.ArrowBack, "返回") }
         })
     }) { padding ->
@@ -119,10 +120,10 @@ fun AppearanceContent(prefs: AppearancePrefs, style: ThemeStyle, mode: ThemeMode
                         val colors = remember(preset, dark, prefs.colorSpec) { customColors(current, prefs.copy(seed = preset.seed, paletteStyle = preset.style), dark) }
                         val selected = prefs.colorSource == "custom" && prefs.seed == preset.seed && prefs.paletteStyle == preset.style
                         Surface(Modifier.width(76.dp).clickable { setDynamic(false); update { it.copy(seed = preset.seed, paletteStyle = preset.style, colorSource = "custom") } },
-                            shape = RoundedCornerShape(16.dp), color = colors.surfaceContainerHigh,
+                            shape = MaterialTheme.shapes.medium, color = colors.surfaceContainerHigh,
                             border = if (selected) BorderStroke(2.dp, colors.primary) else null) {
-                            Column(Modifier.padding(vertical = 10.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                            Column(Modifier.padding(vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                     listOf(colors.primary, colors.secondary, colors.tertiary).forEach { Box(Modifier.size(16.dp).background(it, CircleShape)) }
                                 }
                                 Text(preset.name, color = colors.onSurface, style = MaterialTheme.typography.labelMedium)
@@ -168,8 +169,8 @@ fun AppearanceContent(prefs: AppearancePrefs, style: ThemeStyle, mode: ThemeMode
             Choice("字体大小", listOf("小" to .9f, "标准" to 1f, "大" to 1.15f, "更大" to 1.3f), prefs.fontScale, { value -> update { it.copy(fontScale = value) } })
             Toggle("字体加粗", prefs.fontBold, { value -> update { it.copy(fontBold = value) } })
             Choice("全局字重", listOf("默认" to 0, "轻" to 300, "常规" to 400, "中等" to 500, "粗" to 700), prefs.fontWeight, { value -> update { it.copy(fontWeight = value) } })
-            Preference("应用字体", prefs.fontName.ifBlank { "内置楷体" }, importFont)
-            if (prefs.fontFile.isNotEmpty()) Preference("恢复默认字体", "内置楷体", resetFont)
+            Preference("应用字体", prefs.fontName.ifBlank { "霞鹜文楷" }, importFont)
+            if (prefs.fontFile.isNotEmpty()) Preference("恢复默认字体", "霞鹜文楷", resetFont)
             Choice("界面缩放", listOf("紧凑" to .9f, "标准" to 1f, "宽松" to 1.1f), prefs.uiScale, { value -> update { it.copy(uiScale = value) } })
             Toggle("显示大小微调", prefs.displayScale > 0, { value -> update { it.copy(displayScale = if (value) 100 else 0) } })
             if (prefs.displayScale > 0) Choice("显示缩放", (80..120 step 5).map { "$it%" to it }, prefs.displayScale, { value -> update { it.copy(displayScale = value) } })
@@ -181,7 +182,7 @@ fun AppearanceContent(prefs: AppearancePrefs, style: ThemeStyle, mode: ThemeMode
             Toggle("随机展示开屏壁纸", prefs.splashRandom, { value -> update { it.copy(splashRandom = value) } })
             if (prefs.splashEnabled && prefs.splashRandom) {
                 Text("随机池预览")
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { listOf("ink", "paper", "dawn", "stars").forEach { WallpaperPreview(it, Modifier.weight(1f).height(70.dp)) } }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { listOf("ink", "paper", "dawn", "stars").forEach { WallpaperPreview(it, Modifier.weight(1f).height(70.dp)) } }
             }
             Toggle("开屏图标遮罩动画", prefs.splashAnimation, { value -> update { it.copy(splashAnimation = value) } })
             if (prefs.splashEnabled) {
@@ -224,7 +225,7 @@ fun AppearanceContent(prefs: AppearancePrefs, style: ThemeStyle, mode: ThemeMode
 
 @Composable
 private fun <T> Choice(title: String, options: List<Pair<String, T>>, selected: T, onSelect: (T) -> Unit) {
-    AppDropdown(title, options, selected, onSelect, Modifier.padding(vertical = 6.dp))
+    AppDropdown(title, options, selected, onSelect, Modifier.padding(vertical = 8.dp))
 }
 
 @Composable
@@ -252,11 +253,11 @@ private fun ColorPickerDialog(initial: String, onDismiss: () -> Unit, onApply: (
     fun sync() { hex = "#%06X".format(Color.hsv(hue, saturation, brightness).toArgb() and 0xFFFFFF) }
     AlertDialog(onDismissRequest = onDismiss, title = { Text("自定义主题颜色") }, text = {
         Column {
-            Box(Modifier.fillMaxWidth().height(50.dp).background(Color.hsv(hue, saturation, brightness), RoundedCornerShape(12.dp)))
+            Box(Modifier.fillMaxWidth().height(50.dp).background(Color.hsv(hue, saturation, brightness), MaterialTheme.shapes.medium))
             Text("色相"); Slider(hue, { hue = it; sync() }, valueRange = 0f..360f)
             Text("饱和度"); Slider(saturation, { saturation = it; sync() })
             Text("亮度"); Slider(brightness, { brightness = it; sync() })
             OutlinedTextField(hex, { raw -> hex = raw; normalizeHex(raw)?.let { valid -> val next = parseHexColor(valid).toHsv(); hue = next[0]; saturation = next[1]; brightness = next[2] } }, label = { Text("#RRGGBB") }, singleLine = true, isError = normalizeHex(hex) == null)
         }
-    }, confirmButton = { TextButton(onClick = { normalizeHex(hex)?.let(onApply) }, enabled = normalizeHex(hex) != null) { Text("确定") } }, dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } })
+    }, confirmButton = { AppTextButton(onClick = { normalizeHex(hex)?.let(onApply) }, enabled = normalizeHex(hex) != null) { Text("确定") } }, dismissButton = { AppTextButton(onClick = onDismiss) { Text("取消") } })
 }

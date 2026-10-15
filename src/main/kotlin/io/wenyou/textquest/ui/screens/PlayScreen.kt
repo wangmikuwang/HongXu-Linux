@@ -314,7 +314,7 @@ private fun ProviderDialog(
         text = {
             Column(
                 Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 ProviderOption(
                     label = "跟随默认服务",
@@ -347,7 +347,7 @@ private fun ProviderOption(
 ) {
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(14.dp),
+        shape = MaterialTheme.shapes.medium,
         color = if (selected) MaterialTheme.colorScheme.secondaryContainer
         else MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = Modifier.fillMaxWidth()
@@ -386,11 +386,11 @@ private fun StoryEntry(entry: LogEntry, characters: List<CharacterData>) {
                     containerColor = Color(color.red, color.green, color.blue, alpha = 0.10f)
                 )
             ) {
-                Column(Modifier.padding(14.dp)) {
+                Column(Modifier.padding(16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Surface(shape = RoundedCornerShape(50), color = color) {
                             io.wenyou.textquest.ui.common.RawText(char?.emoji ?: "🎭",
-                                Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                 fontSize = 13.sp)
                         }
                         Spacer(Modifier.width(8.dp))
@@ -407,10 +407,10 @@ private fun StoryEntry(entry: LogEntry, characters: List<CharacterData>) {
         EntryKind.CHOICE -> {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 Surface(
-                    shape = RoundedCornerShape(18.dp),
+                    shape = MaterialTheme.shapes.medium,
                     color = MaterialTheme.colorScheme.secondaryContainer
                 ) {
-                    Column(Modifier.padding(horizontal = 14.dp, vertical = 8.dp)) {
+                    Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                         if (entry.speakerId.isNotBlank()) Text("${entry.speaker} · 你", style = MaterialTheme.typography.labelSmall)
                         io.wenyou.textquest.ui.common.RawText(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSecondaryContainer)
                     }
@@ -425,7 +425,7 @@ private fun StoryEntry(entry: LogEntry, characters: List<CharacterData>) {
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer
                 )
             ) {
-                Column(Modifier.padding(14.dp)) {
+                Column(Modifier.padding(16.dp)) {
                     Text("旁白",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onTertiaryContainer)
@@ -446,7 +446,7 @@ private fun StoryEntry(entry: LogEntry, characters: List<CharacterData>) {
         }
         EntryKind.ERROR -> {
             Surface(
-                shape = RoundedCornerShape(16.dp),
+                shape = MaterialTheme.shapes.medium,
                 color = MaterialTheme.colorScheme.errorContainer
             ) {
                 io.wenyou.textquest.ui.common.RawText(text,
@@ -464,7 +464,7 @@ private fun StreamingCard() {
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
     ) {
-        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             CircularProgressIndicator(Modifier.width(18.dp).height(18.dp), strokeWidth = 2.dp)
             Spacer(Modifier.width(10.dp))
             Text("AI 正在构思…", style = MaterialTheme.typography.bodyLarge,
@@ -514,7 +514,7 @@ private fun ActionPanel(vm: PlayViewModel, ui: PlayUi, nav: NavHostController, v
                         Button(
                             onClick = { vm.chooseAuthored(i) },
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-                            shape = RoundedCornerShape(18.dp)
+                            shape = MaterialTheme.shapes.medium
                         ) { io.wenyou.textquest.ui.common.RawText(choice.text) }
                     }
                 } else if (ui.pendingAiChoices.isNotEmpty()) {
@@ -525,7 +525,7 @@ private fun ActionPanel(vm: PlayViewModel, ui: PlayUi, nav: NavHostController, v
                         FilledTonalButton(
                             onClick = { vm.chooseAi(i) },
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-                            shape = RoundedCornerShape(18.dp)
+                            shape = MaterialTheme.shapes.medium
                         ) { io.wenyou.textquest.ui.common.RawText(choice.text) }
                     }
                     if (ui.aiTargetExit) {
@@ -542,7 +542,7 @@ private fun ActionPanel(vm: PlayViewModel, ui: PlayUi, nav: NavHostController, v
                     ) {
                         if (isAiNode) {
                             Text("AI 未给出选项。", style = MaterialTheme.typography.bodySmall)
-                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 FilledTonalButton(onClick = { vm.continueAi() }, modifier = Modifier.weight(1f)) {
                                     Icon(AppIcons.Refresh, null); Spacer(Modifier.width(6.dp)); Text("继续生成")
                                 }
@@ -556,7 +556,7 @@ private fun ActionPanel(vm: PlayViewModel, ui: PlayUi, nav: NavHostController, v
                     }
                 }
                 Surface(Modifier.fillMaxWidth(), color = Color.Transparent) {
-                    Row(Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                    Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically) {
                         Text("存档后随时可在主页继续", style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.outline)
@@ -587,9 +587,9 @@ private fun DmInput(ui: PlayUi, vm: PlayViewModel) {
             }
             // Full-width rows so long suggestions stay readable instead of being cut off in a sideways strip.
             ui.pendingAiChoices.forEach { c ->
-                Surface(onClick = { vm.dmSend(c.text) }, shape = RoundedCornerShape(14.dp),
+                Surface(onClick = { vm.dmSend(c.text) }, shape = MaterialTheme.shapes.medium,
                     color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.fillMaxWidth()) {
-                    io.wenyou.textquest.ui.common.RawText(c.text, Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
+                    io.wenyou.textquest.ui.common.RawText(c.text, Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                         style = MaterialTheme.typography.bodyMedium, maxLines = 3, overflow = TextOverflow.Ellipsis)
                 }
             }
@@ -606,7 +606,7 @@ private fun DmInput(ui: PlayUi, vm: PlayViewModel) {
                     },
                     maxLines = 3,
                     minLines = 1,
-                    shape = RoundedCornerShape(22.dp),
+                    shape = MaterialTheme.shapes.large,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.readableAccent(),
                         cursorColor = MaterialTheme.colorScheme.readableAccent(),
@@ -639,9 +639,9 @@ private fun PaceDialog(ui: PlayUi, vm: PlayViewModel, onDismiss: () -> Unit) {
             Text("决定 AI 每一轮把剧情往前推多远，随存档保存，可随时更改。", style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
             io.wenyou.textquest.data.model.ScenePace.entries.forEach { pace ->
-                Surface(onClick = { vm.setPace(pace); onDismiss() }, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth(),
+                Surface(onClick = { vm.setPace(pace); onDismiss() }, shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth(),
                     color = if (pace == current) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh) {
-                    Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
+                    Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
                         Text(pace.label, style = MaterialTheme.typography.titleSmall)
                         Text(pace.hint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
@@ -661,7 +661,7 @@ private fun DirectorChatDialog(ui: PlayUi, vm: PlayViewModel, onDismiss: () -> U
             Text("跳出剧情直接和导演交流：问问构思与伏笔，或提出后续剧情的要求。要求会记为导演备忘，之后每一轮都会参考。",
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             ui.directorChat.forEach { m ->
-                Surface(shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth(),
+                Surface(shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth(),
                     color = if (m.fromPlayer) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh) {
                     Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
                         Text(if (m.fromPlayer) "你" else "导演", style = MaterialTheme.typography.labelMedium,
@@ -700,7 +700,7 @@ private fun ChapterDialog(draft: ChapterDraft, vm: PlayViewModel, title: String)
     val context = platformContext()
     var text by remember(draft.summary) { mutableStateOf(draft.summary) }
     AlertDialog(onDismissRequest = { if (!draft.busy) vm.dismissChapter() }, title = { Text("总结并开启新篇章") }, text = {
-        Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("对话太长、AI 开始遗忘或提示超出上下文时，可以把至今的剧情整理成前情提要，在新对话里继续。人物状态、关系和标记会保留，当前进度另存一份。",
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             when {
@@ -734,7 +734,7 @@ private fun ChapterDialog(draft: ChapterDraft, vm: PlayViewModel, title: String)
 /** AI scenes need a service; send the player straight to adding one instead of describing where it is. */
 @Composable
 private fun MissingProviderCard(nav: NavHostController) {
-    Card(shape = RoundedCornerShape(20.dp), modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+    Card(shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer, contentColor = MaterialTheme.colorScheme.onTertiaryContainer)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("还没有可用的 AI 服务", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
@@ -748,14 +748,14 @@ private fun MissingProviderCard(nav: NavHostController) {
 @Composable
 private fun StoppedPanel(ui: PlayUi, vm: PlayViewModel, nav: NavHostController) {
     Card(
-        shape = RoundedCornerShape(24.dp),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
         ),
         modifier = Modifier.fillMaxWidth().padding(12.dp)
     ) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             io.wenyou.textquest.ui.common.AppText(ui.stoppedTitle.ifBlank { "这一局结束了" },
                 style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
             io.wenyou.textquest.ui.common.AppText(ui.stoppedMessage, style = MaterialTheme.typography.bodyMedium)
@@ -821,13 +821,13 @@ private fun ConsoleDrawer(ui: PlayUi, vm: PlayViewModel, directorChat: Boolean, 
             // The drawer draws behind the system bars (edge to edge); keep its content clear of them.
             Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical + WindowInsetsSides.Start))
                 .padding(16.dp).verticalScroll(rememberScrollState()).testTag("console"),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text("控制台", style = MaterialTheme.typography.titleLarge)
             val hasSession = ui.session != null
             val pace = io.wenyou.textquest.data.model.ScenePace.of(ui.session?.pace.orEmpty())
             val export = rememberTranscriptExport(ui)
-            Card(shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
+            Card(shape = MaterialTheme.shapes.medium, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
                 ConsoleOption("推进节奏：${pace.label}", hasSession, onPace)
                 if (ui.aiMode) ConsoleOption("总结并开启新篇章",
                     hasSession && ui.stage != PlayStage.AI_WORKING && ui.stage != PlayStage.ROLE_SELECT, onChapter)
@@ -867,11 +867,12 @@ private fun CharacterStateCard(ui: PlayUi, c: io.wenyou.textquest.data.model.Cha
     var flagsText by remember(c.id) { mutableStateOf("") }
     val editing = draft
     Card(
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        shape = MaterialTheme.shapes.medium,
+        // Same surface as the options card above, so cards stand out from the drawer in light and dark themes.
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         modifier = Modifier.testTag("state-${c.id}")
     ) {
-        Column(Modifier.padding(12.dp)) {
+        Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 io.wenyou.textquest.ui.common.RawText("${c.emoji} ${c.name}", style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
                 if (editing == null) AppTextButton(onClick = { draft = st; flagsText = st.flags.joinToString("、") }, enabled = editable,
@@ -919,7 +920,7 @@ private fun CharacterStateCard(ui: PlayUi, c: io.wenyou.textquest.data.model.Cha
                 val missing = offered.filter { it.key !in editing.metrics }
                 if (missing.isNotEmpty()) {
                     Text("添加状态", style = MaterialTheme.typography.labelSmall)
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         missing.forEach { d ->
                             io.wenyou.textquest.ui.common.FilterTag("＋${d.label}", false,
                                 { draft = editing.copy(metrics = editing.metrics + (d.key to 50.0)) })
@@ -931,10 +932,10 @@ private fun CharacterStateCard(ui: PlayUi, c: io.wenyou.textquest.data.model.Cha
                 Spacer(Modifier.height(6.dp))
                 io.wenyou.textquest.ui.common.AppField(value = editing.description, onValueChange = { draft = editing.copy(description = it) },
                     label = "穿着/外观", modifier = Modifier.fillMaxWidth())
-                Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth().padding(top = 6.dp)) {
+                Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
                     AppTextButton(onClick = { draft = null }) { Text("取消") }
                     AppTextButton(onClick = {
-                        onSave(editing.copy(flags = flagsText.split('、', ',', '，', '\n').toSet(), lastChangeReason = "玩家手动调整"))
+                        onSave(editing.copy(flags = flagsText.split('、', ',', '，', '\n').toSet()))
                         draft = null
                     }, modifier = Modifier.testTag("save-${c.id}")) { Text("保存") }
                 }
@@ -951,7 +952,7 @@ private fun CharacterStateCard(ui: PlayUi, c: io.wenyou.textquest.data.model.Cha
 private fun ThinkingBlock(reasoning: String) {
     var expanded by remember { mutableStateOf(false) }
     Surface(
-        shape = RoundedCornerShape(14.dp),
+        shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = Modifier.fillMaxWidth()
     ) {

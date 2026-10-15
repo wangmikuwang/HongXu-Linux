@@ -84,7 +84,7 @@ fun CharacterEditScreen(container: WenYouApp.AppContainer, nav: NavHostControlle
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item { AppTextButton(onClick = { revisionOpen = true }) { Text("一句话修改") } }
             if (ui.message.isNotBlank()) {

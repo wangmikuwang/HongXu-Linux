@@ -252,7 +252,7 @@ fun SettingsScreen(container: WenYouApp.AppContainer, nav: NavHostController, up
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.height(10.dp))
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(onClick = {
                                 exportBackup("${BuildConfig.APP_FILE_PREFIX}-backup-${System.currentTimeMillis()}.json")
                             }) { Text("导出备份") }
@@ -294,9 +294,9 @@ fun SettingsScreen(container: WenYouApp.AppContainer, nav: NavHostController, up
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.height(10.dp))
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             AppOutlinedButton(onClick = { pickCrashDir() }) { Text("选择系统文档目录") }
-                            Button(onClick = {
+                            AppOutlinedButton(onClick = {
                                 val t = "测试日志 time=${System.currentTimeMillis()}\nversion=${BuildConfig.VERSION_NAME}\n"
                                 CrashLog.write(context, t, vm.crashDir())
                                 vm.setMessage("已写入测试日志（请到所选 Documents 目录查看 crash.log）")

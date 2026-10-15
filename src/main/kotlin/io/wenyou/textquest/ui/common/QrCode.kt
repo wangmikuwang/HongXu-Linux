@@ -73,7 +73,7 @@ object QrCode {
         }
     }
 
-    private val typeface by lazy { FontMgr.default.makeFromData(org.jetbrains.skia.Data.makeFromBytes(openAsset(io.wenyou.textquest.platform.appContext, "bundled_kai_regular.ttf").readBytes())) }
+    private val typeface by lazy { FontMgr.default.makeFromData(org.jetbrains.skia.Data.makeFromBytes(openAsset(io.wenyou.textquest.platform.appContext, "lxgw_wenkai_regular.ttf").readBytes())) }
 
     /** One shareable image: the title, then every page of the QR book in a numbered grid that image import reads at once. */
     private fun poster(title: String, appName: String, pages: List<String>): Image? {

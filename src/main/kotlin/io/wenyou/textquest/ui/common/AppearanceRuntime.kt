@@ -40,7 +40,7 @@ fun WallpaperPreview(key: String, modifier: Modifier = Modifier) {
         "stars" -> listOf(Color(0xFF070B28), Color(0xFF404890), Color(0xFF8965A9))
         else -> listOf(Color(0xFF12151D), Color(0xFF3C315C), Color(0xFF716185))
     }
-    Box(modifier.clip(RoundedCornerShape(14.dp)).background(Brush.linearGradient(colors))) {
+    Box(modifier.clip(MaterialTheme.shapes.medium).background(Brush.linearGradient(colors))) {
         bitmap?.let { Image(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
     }
 }
