@@ -12,6 +12,9 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -130,6 +133,7 @@ fun Pill(text: String, modifier: Modifier = Modifier, container: Color? = null, 
 fun FilterTag(label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier, accentIndex: Int = 0) {
     val accent = distributedAccent(accentIndex, MaterialTheme.colorScheme.primary)
     val custom = LocalAccentPalette.current.isNotEmpty()
+    val apple = LocalThemeStyle.current == ThemeStyle.APPLE
     FilterChip(selected = selected, onClick = onClick, modifier = modifier,
         leadingIcon = if (custom) {{
             if (selected) androidx.compose.material3.Icon(
@@ -139,23 +143,91 @@ fun FilterTag(label: String, selected: Boolean, onClick: () -> Unit, modifier: M
                 border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline)) {}
         }} else null,
         shape = RoundedCornerShape(50), label = { io.wenyou.textquest.ui.common.AppText(label, maxLines = 2, overflow = TextOverflow.Ellipsis) },
+        // Apple: borderless gray-filled capsules, as in iOS filter bars.
+        border = if (apple) FilterChipDefaults.filterChipBorder(enabled = true, selected = selected, borderColor = Color.Transparent) else FilterChipDefaults.filterChipBorder(enabled = true, selected = selected),
         colors = FilterChipDefaults.filterChipColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            containerColor = if (apple) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.surfaceContainerLow,
             labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
             selectedContainerColor = accent,
             selectedLabelColor = if (custom) accentForeground(accent) else MaterialTheme.colorScheme.onPrimary))
 }
 
-/** 分组卡片标题。 */
+/** 分组卡片标题。Apple 主题按 HIG 分组列表：脚注字号、次要标签色、与单元格内容对齐。 */
 @Composable
 fun SectionHeader(title: String, modifier: Modifier = Modifier) {
+    if (LocalThemeStyle.current == ThemeStyle.APPLE) {
+        Text(title, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = modifier.padding(start = 16.dp, top = 16.dp, bottom = 4.dp))
+        return
+    }
     Text(
         title,
-        style = if (LocalThemeStyle.current == ThemeStyle.APPLE) MaterialTheme.typography.labelLarge else MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold,
-        color = if (LocalThemeStyle.current == ThemeStyle.APPLE) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+        color = MaterialTheme.colorScheme.onSurface,
         modifier = modifier.padding(start = 4.dp, top = 12.dp, bottom = 6.dp)
     )
+}
+
+/** Switch; the Apple theme uses the iOS look (systemGreen track, plain white thumb, no outline). */
+@Composable
+fun AppSwitch(checked: Boolean, onCheckedChange: ((Boolean) -> Unit)?, modifier: Modifier = Modifier, enabled: Boolean = true) {
+    if (LocalThemeStyle.current != ThemeStyle.APPLE) {
+        Switch(checked = checked, onCheckedChange = onCheckedChange, modifier = modifier, enabled = enabled)
+        return
+    }
+    val dark = MaterialTheme.colorScheme.background.luminance() < .5f
+    val off = if (dark) Color(0xFF39393D) else Color(0xFFE5E5EA) // systemGray5
+    Switch(checked = checked, onCheckedChange = onCheckedChange, modifier = modifier, enabled = enabled,
+        colors = androidx.compose.material3.SwitchDefaults.colors(
+            checkedThumbColor = Color.White, checkedTrackColor = io.wenyou.textquest.ui.theme.appleSwitchGreen(dark), checkedBorderColor = Color.Transparent,
+            uncheckedThumbColor = Color.White, uncheckedTrackColor = off, uncheckedBorderColor = Color.Transparent))
+}
+
+/** iOS segmented control: a gray capsule track with the selected segment raised on a light thumb. */
+@Composable
+private fun <T> AppleSegmented(label: String, options: List<Pair<String, T>>, selected: T?, onSelect: (T) -> Unit,
+    modifier: Modifier, enabled: Boolean) {
+    val dark = MaterialTheme.colorScheme.background.luminance() < .5f
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Surface(shape = RoundedCornerShape(50), color = if (dark) Color(0xFF2C2C2E) else Color(0xFFEEEEF0)) {
+            Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(4.dp).selectableGroup(), verticalAlignment = Alignment.CenterVertically) {
+                options.forEach { (name, value) ->
+                    val isSelected = value == selected
+                    Surface(
+                        Modifier.weight(1f).heightIn(min = 40.dp)
+                            .selectable(isSelected, enabled = enabled, role = Role.RadioButton, onClick = { onSelect(value) }),
+                        shape = RoundedCornerShape(50),
+                        color = if (isSelected) (if (dark) Color(0xFF636366) else Color.White) else Color.Transparent,
+                        shadowElevation = if (isSelected && !dark) 2.dp else 0.dp
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            io.wenyou.textquest.ui.common.AppText(name, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.bodyMedium, fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (enabled) 1f else .38f),
+                                modifier = Modifier.padding(horizontal = 8.dp))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Assist chip; the Apple theme draws a borderless tinted capsule like iOS small buttons. */
+@Composable
+fun AppAssistChip(onClick: () -> Unit, label: @Composable () -> Unit, leadingIcon: (@Composable () -> Unit)? = null,
+    trailingIcon: (@Composable () -> Unit)? = null) {
+    if (LocalThemeStyle.current != ThemeStyle.APPLE) {
+        androidx.compose.material3.AssistChip(onClick = onClick, label = label, leadingIcon = leadingIcon, trailingIcon = trailingIcon)
+        return
+    }
+    androidx.compose.material3.AssistChip(onClick = onClick, label = label, leadingIcon = leadingIcon, trailingIcon = trailingIcon,
+        shape = RoundedCornerShape(50), border = null,
+        colors = androidx.compose.material3.AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            labelColor = MaterialTheme.colorScheme.onSurface, leadingIconContentColor = MaterialTheme.colorScheme.readableAccent(),
+            trailingIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant))
 }
 
 /** 带标题与说明的开关行（用于内容分类等布尔设置）。 */
@@ -180,7 +252,7 @@ fun SwitchRow(
             )
         }
         Spacer(Modifier.size(8.dp))
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        AppSwitch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
 
@@ -230,9 +302,10 @@ fun AppField(
             focusedLabelColor = MaterialTheme.colorScheme.readableAccent(),
             focusedBorderColor = MaterialTheme.colorScheme.readableAccent(),
             cursorColor = MaterialTheme.colorScheme.readableAccent(),
-            unfocusedBorderColor = if (LocalThemeStyle.current == ThemeStyle.APPLE) MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outline,
-            focusedContainerColor = if (LocalThemeStyle.current == ThemeStyle.APPLE) MaterialTheme.colorScheme.surfaceContainer else Color.Transparent,
-            unfocusedContainerColor = if (LocalThemeStyle.current == ThemeStyle.APPLE) MaterialTheme.colorScheme.surfaceContainer else Color.Transparent),
+            // Apple: HIG filled field (tertiary system fill, no outline until focused).
+            unfocusedBorderColor = if (LocalThemeStyle.current == ThemeStyle.APPLE) Color.Transparent else MaterialTheme.colorScheme.outline,
+            focusedContainerColor = if (LocalThemeStyle.current == ThemeStyle.APPLE) MaterialTheme.colorScheme.surfaceContainerHigh else Color.Transparent,
+            unfocusedContainerColor = if (LocalThemeStyle.current == ThemeStyle.APPLE) MaterialTheme.colorScheme.surfaceContainerHigh else Color.Transparent),
         singleLine = singleLine,
         minLines = effMin,
         maxLines = effMax,
@@ -256,12 +329,47 @@ fun <T> AppDropdown(
     error: String? = null
 ) {
     var expanded by remember { mutableStateOf(false) }
-    if (LocalAppearance.current.popupStyle == "dialog") {
+    // HIG: a few short, mutually exclusive choices read best as a segmented control.
+    val language = LocalAppearance.current.language
+    if (LocalThemeStyle.current == ThemeStyle.APPLE && error == null && options.size in 2..4 &&
+        options.all { uiLabel(it.first, language).length <= if (options.size == 4) 5 else 8 }) {
+        AppleSegmented(label, options, selected, onSelect, modifier, enabled)
+        return
+    }
+    val dialog = LocalAppearance.current.popupStyle == "dialog"
+    if (LocalThemeStyle.current == ThemeStyle.APPLE) {
+        // HIG pop-up button in a list row: title on the left, current value and a chevron on the right.
+        Column(modifier.fillMaxWidth()) {
+            Box {
+                Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(enabled = enabled, role = Role.DropdownList) { expanded = true },
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(label, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (enabled) 1f else .38f))
+                    io.wenyou.textquest.ui.common.AppText(options.firstOrNull { it.second == selected }?.first ?: "",
+                        Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = androidx.compose.ui.text.style.TextAlign.End,
+                        style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    androidx.compose.material3.Icon(AppIcons.KeyboardArrowRight, null, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                if (!dialog) androidx.compose.material3.DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    options.forEach { (text, value) ->
+                        DropdownMenuItem(text = { io.wenyou.textquest.ui.common.AppText(text) },
+                            trailingIcon = if (value == selected) {{ androidx.compose.material3.Icon(AppIcons.Check, "已选中", tint = MaterialTheme.colorScheme.readableAccent()) }} else null,
+                            onClick = { onSelect(value); expanded = false })
+                    }
+                }
+            }
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
+        }
+        if (!dialog) return
+    }
+    if (dialog) {
+        if (LocalThemeStyle.current != ThemeStyle.APPLE) {
         Box(modifier) {
             OutlinedTextField(value = uiLabel(options.firstOrNull { it.second == selected }?.first ?: "", LocalAppearance.current.language), onValueChange = {},
                 readOnly = true, enabled = enabled, singleLine = true, label = { Text(label) },
                 modifier = Modifier.fillMaxWidth().clickable(enabled = enabled) { expanded = true })
             Box(Modifier.matchParentSize().clickable(enabled = enabled) { expanded = true })
+        }
         }
         if (expanded) androidx.compose.material3.AlertDialog(onDismissRequest = { expanded = false }, title = { Text(label) },
             text = { androidx.compose.foundation.lazy.LazyColumn { options.forEach { (name, value) -> item {
@@ -339,6 +447,10 @@ fun SearchField(query: String, onQueryChange: (String) -> Unit, placeholder: Str
         trailingIcon = if (query.isNotEmpty()) {{ IconButton(onClick = { onQueryChange("") }) { AppIcon(AppIcons.Close, "清除搜索") } }} else null,
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedBorderColor = Color.Transparent, focusedBorderColor = MaterialTheme.colorScheme.outline,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow))
+            unfocusedContainerColor = searchFill(), focusedContainerColor = searchFill()))
 }
+
+/** HIG search bars use a gray fill on grouped backgrounds; other themes keep the low container. */
+@Composable
+private fun searchFill() = if (LocalThemeStyle.current == ThemeStyle.APPLE) MaterialTheme.colorScheme.surfaceContainerHighest
+    else MaterialTheme.colorScheme.surfaceContainerLow

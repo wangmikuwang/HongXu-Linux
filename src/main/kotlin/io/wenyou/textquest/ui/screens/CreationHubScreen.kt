@@ -25,7 +25,7 @@ import androidx.compose.material3.Button
 @Composable
 fun CreationHubScreen(container: WenYouApp.AppContainer, nav: NavHostController) {
     var aiOpen by rememberSaveable { mutableStateOf(false) }
-    HubScaffold(topBar = { CenterAlignedTopAppBar(title = { Text("创建") }) }, nav = nav) { padding ->
+    HubScaffold(topBar = { io.wenyou.textquest.ui.HubTopBar(title = { Text("创建") }) }, nav = nav) { padding ->
         CreationHubContent({ nav.navigate(R.storyEdit("new")) }, { nav.navigate(R.charEdit("new")) },
             { aiOpen = true }, Modifier.padding(padding))
     }

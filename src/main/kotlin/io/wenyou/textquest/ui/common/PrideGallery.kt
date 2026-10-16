@@ -71,11 +71,11 @@ internal fun PrideGallery(unlocked: Boolean, enabled: Boolean, showLgbt: Boolean
             if (unlocked) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("骄傲主题选项", Modifier.weight(1f))
-                    Switch(checked = enabled, onCheckedChange = onEnabledChange, modifier = Modifier.testTag("pride-enabled"))
+                    io.wenyou.textquest.ui.common.AppSwitch(checked = enabled, onCheckedChange = onEnabledChange, modifier = Modifier.testTag("pride-enabled"))
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("显示 LGBT（LGBTQ+）内容", Modifier.weight(1f))
-                    Switch(checked = showLgbt, onCheckedChange = onShowLgbtChange, modifier = Modifier.testTag("pride-content"))
+                    io.wenyou.textquest.ui.common.AppSwitch(checked = showLgbt, onCheckedChange = onShowLgbtChange, modifier = Modifier.testTag("pride-content"))
                 }
             }
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {

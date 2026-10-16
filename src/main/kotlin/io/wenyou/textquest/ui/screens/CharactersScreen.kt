@@ -34,7 +34,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -108,7 +107,7 @@ fun CharactersScreen(container: WenYouApp.AppContainer, nav: NavHostController) 
 
     HubScaffold(
         topBar = {
-            CenterAlignedTopAppBar(
+            io.wenyou.textquest.ui.HubTopBar(
                 title = { Text("角色") },
                 actions = {
                     AppTextButton(onClick = { importPicker = true }) { Text("导入") }
@@ -322,7 +321,7 @@ private fun CharacterCard(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     stories.forEach { story ->
-                        AssistChip(
+                        io.wenyou.textquest.ui.common.AppAssistChip(
                             onClick = { onPlay(story) },
                             label = { io.wenyou.textquest.ui.common.RawText(story.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                             leadingIcon = { Icon(AppIcons.PlayArrow, "开始剧情") }

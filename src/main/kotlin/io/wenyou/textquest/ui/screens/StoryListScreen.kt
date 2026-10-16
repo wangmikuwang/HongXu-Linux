@@ -143,7 +143,7 @@ fun StoryListScreen(container: WenYouApp.AppContainer, nav: NavHostController) {
 
     HubScaffold(
         topBar = {
-            CenterAlignedTopAppBar(
+            io.wenyou.textquest.ui.HubTopBar(
                 title = { Text("剧情库") },
                 actions = {
                     AppTextButton(onClick = { importPicker = true }) { Text("导入") }

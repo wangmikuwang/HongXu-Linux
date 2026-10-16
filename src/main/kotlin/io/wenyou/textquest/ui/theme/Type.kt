@@ -72,11 +72,26 @@ val AppTypography = Typography(
     )
 )
 
-val AppleTypography = AppTypography.copy(
-    headlineLarge = AppTypography.headlineLarge.copy(fontFamily = FontFamily.Default, fontSize = 34.sp, lineHeight = 41.sp, letterSpacing = 0.sp),
-    displaySmall = AppTypography.displaySmall.copy(fontFamily = FontFamily.Default, fontSize = 34.sp, lineHeight = 41.sp, letterSpacing = 0.sp),
-    titleLarge = AppTypography.titleLarge.copy(fontFamily = FontFamily.Default, fontSize = 20.sp, lineHeight = 26.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.sp),
-    labelSmall = AppTypography.labelSmall.copy(fontFamily = FontFamily.Default, fontSize = 11.sp, lineHeight = 15.sp, letterSpacing = 0.sp),
-    bodyLarge = AppTypography.bodyLarge.copy(fontSize = 17.sp, lineHeight = 27.sp, letterSpacing = 0.sp),
-    bodyMedium = AppTypography.bodyMedium.copy(fontSize = 15.sp, lineHeight = 24.sp, letterSpacing = 0.sp)
+private fun ios(size: Int, line: Int, weight: FontWeight = FontWeight.Normal) =
+    TextStyle(fontSize = size.sp, lineHeight = line.sp, fontWeight = weight, letterSpacing = 0.sp)
+
+/**
+ * Apple HIG iOS text styles (Large Title 34 … Caption 2 11). Sizes follow the HIG; line heights are
+ * opened up for CJK glyphs, and Body keeps the long-reading leading of the story text.
+ */
+val AppleTypography = Typography(
+    displayLarge = ios(34, 44, FontWeight.Bold), displayMedium = ios(34, 44, FontWeight.Bold),
+    displaySmall = ios(34, 44, FontWeight.Bold),      // Large Title
+    headlineLarge = ios(34, 44, FontWeight.Bold),     // Large Title
+    headlineMedium = ios(28, 36, FontWeight.Bold),    // Title 1
+    headlineSmall = ios(22, 30, FontWeight.Bold),     // Title 2
+    titleLarge = ios(20, 28, FontWeight.SemiBold),    // Title 3
+    titleMedium = ios(17, 24, FontWeight.SemiBold),   // Headline
+    titleSmall = ios(15, 21, FontWeight.SemiBold),    // Subheadline, emphasized
+    bodyLarge = ios(17, 27),                          // Body
+    bodyMedium = ios(15, 23),                         // Subheadline
+    bodySmall = ios(13, 18),                          // Footnote
+    labelLarge = ios(17, 22, FontWeight.Medium),      // Buttons
+    labelMedium = ios(12, 16),                        // Caption 1
+    labelSmall = ios(11, 14)                          // Caption 2
 )

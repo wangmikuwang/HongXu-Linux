@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -20,6 +21,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -35,6 +37,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import io.wenyou.textquest.data.repo.SettingsStore
 import io.wenyou.textquest.ui.common.AppIcon
 import io.wenyou.textquest.ui.common.AppText
+import io.wenyou.textquest.ui.theme.LocalThemeStyle
+import io.wenyou.textquest.ui.theme.ThemeStyle
 
 /** True when the window is wide enough for the desktop layout: navigation rail on the left, no bottom dock. */
 val LocalWideLayout = staticCompositionLocalOf { false }
@@ -90,11 +94,15 @@ private fun handleKey(event: KeyEvent, nav: NavHostController, settings: Setting
 @Composable
 private fun HubRail(nav: NavHostController) {
     val current = nav.currentBackStackEntryAsState().value?.destination?.route
+    // Apple (HIG sidebar/tab bar): the selected item is tinted with the accent, no pill; first item lines up with the large title.
+    val apple = LocalThemeStyle.current == ThemeStyle.APPLE
+    val colors = if (apple) NavigationRailItemDefaults.colors(selectedIconColor = MaterialTheme.colorScheme.primary,
+        selectedTextColor = MaterialTheme.colorScheme.primary, indicatorColor = Color.Transparent) else NavigationRailItemDefaults.colors()
     NavigationRail {
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(if (apple) 24.dp else 12.dp))
         hubItems.forEach { item ->
             NavigationRailItem(selected = current == item.route, onClick = { navigateHub(nav, item.route, current) },
-                icon = { AppIcon(item.icon, contentDescription = item.label) }, label = { AppText(item.label) })
+                icon = { AppIcon(item.icon, contentDescription = item.label) }, label = { AppText(item.label) }, colors = colors)
         }
     }
 }

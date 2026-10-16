@@ -31,7 +31,7 @@ fun DeveloperCard(container: WenYouApp.AppContainer) {
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Spacer(Modifier.width(12.dp))
-            Switch(dev.directorChat, container.devMode::setDirectorChat, Modifier.testTag("dev-director-chat"))
+            io.wenyou.textquest.ui.common.AppSwitch(dev.directorChat, container.devMode::setDirectorChat, Modifier.testTag("dev-director-chat"))
         }
     }
 }

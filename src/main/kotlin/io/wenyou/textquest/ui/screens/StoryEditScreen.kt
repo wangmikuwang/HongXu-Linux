@@ -28,7 +28,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -642,7 +641,7 @@ private fun FlagRows(flags: Set<String>, onAdd: (String) -> Unit, onRemove: (Str
     var newFlag by remember { mutableStateOf("") }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         flags.forEach { f ->
-            AssistChip(
+            io.wenyou.textquest.ui.common.AppAssistChip(
                 onClick = { onRemove(f) },
                 label = { io.wenyou.textquest.ui.common.RawText(f) },
                 trailingIcon = { Icon(AppIcons.Close, null, Modifier.width(16.dp).height(16.dp)) }

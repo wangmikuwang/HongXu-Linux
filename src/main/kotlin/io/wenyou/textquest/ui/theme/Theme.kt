@@ -23,7 +23,7 @@ enum class ThemeStyle {
     }
 }
 
-/** Apple HIG 风格：系统蓝、分组背景；继续使用 Android 原生字体与控件。 */
+/** Apple 主题（参照 Apple 人机界面指南）：系统蓝、分组背景、液态玻璃导航；液态玻璃只在此主题内生效。 */
 internal fun appleColors(dark: Boolean) = if (dark) darkColorScheme(
     primary = Color(0xFF80B8FF), onPrimary = Color(0xFF002B55),
     primaryContainer = Color(0xFF12395C), onPrimaryContainer = Color(0xFFD6E9FF),
@@ -45,6 +45,24 @@ internal fun appleColors(dark: Boolean) = if (dark) darkColorScheme(
     surfaceContainer = Color(0xFFF8F8FA), surfaceContainerHigh = Color(0xFFECECF1), surfaceContainerHighest = Color(0xFFE4E4E9),
     surfaceVariant = Color(0xFFECECF1), onSurfaceVariant = Color(0xFF56565E), outline = Color(0xFF767680), outlineVariant = Color(0xFFD1D1D6), surfaceTint = Color.Transparent
 )
+/**
+ * HIG semantic colors on top of [appleColors]: bars sit on systemGroupedBackground, separators use the
+ * system separator, destructive text uses the increased-contrast systemRed. The blues stay at the
+ * accessible tints so accent text keeps 4.5:1 on every grouped surface.
+ */
+internal fun appleHigColors(dark: Boolean) = appleColors(dark).let {
+    if (dark) it.copy(surface = Color.Black, outlineVariant = Color(0xFF38383A),
+        error = Color(0xFFFF6961), onError = Color.Black, errorContainer = Color(0xFF3A1A18), onErrorContainer = Color(0xFFFFDAD6),
+        tertiary = Color(0xFFFFB340), surfaceContainer = Color(0xFF1C1C1E))
+    // #0060C8: systemBlue hue at 4.7:1 on the darkest grouped fill (#E4E4E9), so accent text stays blue.
+    else it.copy(primary = Color(0xFF0060C8), surface = Color(0xFFF2F2F7), outlineVariant = Color(0xFFC6C6C8),
+        error = Color(0xFFD70015), onError = Color.White, errorContainer = Color(0xFFFFE5E3), onErrorContainer = Color(0xFF5C0008),
+        tertiary = Color(0xFFC93400), surfaceContainer = Color(0xFFF9F9F9))
+}
+
+/** iOS switch track green (systemGreen), used only by the Apple theme. */
+internal fun appleSwitchGreen(dark: Boolean) = if (dark) Color(0xFF30D158) else Color(0xFF34C759)
+
 val LocalThemeStyle = staticCompositionLocalOf { ThemeStyle.MATERIAL }
 private val AppleShapes = Shapes(extraSmall = RoundedCornerShape(6.dp), small = RoundedCornerShape(10.dp), medium = RoundedCornerShape(14.dp), large = RoundedCornerShape(22.dp), extraLarge = RoundedCornerShape(30.dp))
 private val AppShapes = Shapes(
@@ -125,7 +143,7 @@ fun WenYouTheme(
     val baseColors = androidx.compose.runtime.remember(style, dark, dynamicColor, prideTheme, appearance.colorSource, appearance.seed, appearance.paletteStyle, appearance.colorSpec, context) {
     val original = when {
         appearance.colorSource == "custom" -> customColors(if (dark) DarkColors else LightColors, appearance, dark)
-        style == ThemeStyle.APPLE -> appleColors(dark)
+        style == ThemeStyle.APPLE -> appleHigColors(dark)
         style == ThemeStyle.MIUIX -> appleColors(dark).copy(primary = if (dark) Color(0xFF89B6FF) else Color(0xFF3482FF))
         dark -> DarkColors
         else -> LightColors
@@ -141,7 +159,7 @@ fun WenYouTheme(
         appearanceTypography(if (style == ThemeStyle.APPLE) AppleTypography else AppTypography, appearance, context)
     }
     androidx.compose.runtime.SideEffect { io.wenyou.textquest.ui.common.appLanguage = appearance.language }
-    CompositionLocalProvider(LocalThemeStyle provides style, LocalAppearance provides appearance, LocalGlassEnabled provides appearance.glassEnabled,
+    CompositionLocalProvider(LocalThemeStyle provides style, LocalAppearance provides appearance, LocalGlassEnabled provides (style == ThemeStyle.APPLE && appearance.glassEnabled),
         androidx.compose.ui.platform.LocalDensity provides androidx.compose.ui.unit.Density(systemDensity.density * densityScale, systemDensity.fontScale * appearance.fontScale),
         LocalAccentPalette provides (prideTheme?.let { theme ->
             (theme.colors + if (theme == PrideTheme.DEMISEXUAL) listOf(Color.Black) else emptyList()).distinct()

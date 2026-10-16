@@ -29,11 +29,15 @@ import io.wenyou.textquest.ui.WenYouAppRoot
 import io.wenyou.textquest.ui.common.DOCK_LENS_SHADER
 import io.wenyou.textquest.ui.common.GLASS_SHADER
 import io.wenyou.textquest.ui.theme.ThemeStyle
+import io.wenyou.textquest.ui.theme.ThemeMode
+import io.wenyou.textquest.ui.theme.AppearancePrefs
+import io.wenyou.textquest.ui.theme.LocalGlassEnabled
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.skia.EncodedImageFormat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
@@ -63,6 +67,7 @@ class RenderSmokeTest {
         runBlocking(Dispatchers.Main) { render("home-wide.png", 1120, 780) { WenYouAppRoot(container) } }
         container.settings.setThemeStyle(ThemeStyle.APPLE)
         runBlocking(Dispatchers.Main) { renderHome(container, "home-glass.png") }
+        runBlocking(Dispatchers.Main) { render("home-wide-apple.png", 1120, 780) { WenYouAppRoot(container) } }
     }
 
     /** The Android AGSL shaders must compile as Skia SkSL, or the glass silently falls back to a flat tint. */
@@ -102,6 +107,36 @@ class RenderSmokeTest {
                 }
             }
         }
+        // Apple theme (HIG): large titles, grouped backgrounds, iOS controls; light and dark.
+        container.settings.setThemeStyle(ThemeStyle.APPLE)
+        for (mode in listOf(ThemeMode.LIGHT, ThemeMode.DARK)) {
+            container.settings.setThemeMode(mode)
+            for (name in listOf("stories", "characters", "create", "settings", "appearance", "play")) runBlocking(Dispatchers.Main) {
+                render("apple-${mode.name.lowercase()}-$name.png") {
+                    val prefs by container.settings.state.collectAsStateWithLifecycle()
+                    WenYouTheme(mode = prefs.themeMode, dynamicColor = prefs.dynamicColor, style = prefs.themeStyle, appearance = prefs.appearance) {
+                        val nav = rememberNavController()
+                        NavHost(nav, startDestination = "screen") { composable("screen") { screens.getValue(name)(nav) } }
+                    }
+                }
+            }
+            runBlocking(Dispatchers.Main) { render("apple-${mode.name.lowercase()}-wide.png", 1120, 780) { WenYouAppRoot(container) } }
+        }
+    }
+
+    /** Liquid Glass belongs to the Apple theme: other styles never get it, and 降低透明度 (glassEnabled = false) turns it off. */
+    @Test
+    fun liquidGlassBelongsToTheAppleTheme() {
+        fun glass(style: ThemeStyle, enabled: Boolean): Boolean {
+            var result: Boolean? = null
+            val scene = ImageComposeScene(8, 8) { WenYouTheme(style = style, appearance = AppearancePrefs(glassEnabled = enabled)) { result = LocalGlassEnabled.current } }
+            try { scene.render() } finally { scene.close() }
+            return result!!
+        }
+        assertTrue(glass(ThemeStyle.APPLE, true))
+        assertFalse(glass(ThemeStyle.APPLE, false))
+        assertFalse(glass(ThemeStyle.MATERIAL, true))
+        assertFalse(glass(ThemeStyle.MIUIX, true))
     }
 
     private fun renderHome(container: WenYouApp.AppContainer, name: String) = render(name) { WenYouAppRoot(container) }

@@ -254,6 +254,16 @@ fun HubBottomBar(nav: NavHostController) {
     }
 }
 
+/** Hub 页顶栏。Apple 主题按 HIG 用左对齐大标题（Large Title），其余主题保持居中标题。 */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun HubTopBar(title: @Composable () -> Unit, actions: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {}) {
+    if (io.wenyou.textquest.ui.theme.LocalThemeStyle.current == io.wenyou.textquest.ui.theme.ThemeStyle.APPLE) {
+        androidx.compose.material3.TopAppBar(title = { androidx.compose.material3.ProvideTextStyle(MaterialTheme.typography.headlineLarge, title) },
+            actions = actions, expandedHeight = 64.dp)
+    } else androidx.compose.material3.CenterAlignedTopAppBar(title = title, actions = actions)
+}
+
 /** 带底部导航的 Hub 页 Scaffold（顶部栏由各页决定：无则传 null）。 */
 @Composable
 fun HubScaffold(

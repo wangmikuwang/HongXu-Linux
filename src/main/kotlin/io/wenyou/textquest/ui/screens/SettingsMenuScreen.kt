@@ -41,7 +41,7 @@ internal val settingsSections = listOf(
 @Composable
 internal fun SettingsMenuScreen(nav: NavHostController) {
     HubScaffold(topBar = {
-        CenterAlignedTopAppBar(title = { AppText("设置") })
+        io.wenyou.textquest.ui.HubTopBar(title = { AppText("设置") })
     }, nav = nav) { padding ->
         SettingsMenuContent({ section -> nav.navigate(if (section == "appearance") R.APPEARANCE else R.settingsDetail(section)) }, Modifier.padding(padding))
     }

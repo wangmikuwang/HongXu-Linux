@@ -96,9 +96,8 @@ fun AppearanceContent(prefs: AppearancePrefs, style: ThemeStyle, mode: ThemeMode
         if (message.isNotEmpty()) item { Text(message, color = MaterialTheme.colorScheme.primary) }
         item { SectionHeader("显示模式") }
         item { TonalCard {
-            Choice("界面风格", listOf("Material You" to ThemeStyle.MATERIAL, "Miuix" to ThemeStyle.MIUIX, "液态玻璃" to ThemeStyle.APPLE), style, setStyle)
-            Text(when (style) { ThemeStyle.MATERIAL -> "原生 Material 控件与层次"; ThemeStyle.MIUIX -> "清晰圆角、蓝色强调与分组背景"; ThemeStyle.APPLE -> "悬浮玻璃底栏、整项胶囊与通透材质" }, style = MaterialTheme.typography.bodySmall)
-            Toggle("液态玻璃", prefs.glassEnabled, { value -> update { it.copy(glassEnabled = value) } })
+            Choice("界面风格", listOf("Material You" to ThemeStyle.MATERIAL, "Miuix" to ThemeStyle.MIUIX, "Apple" to ThemeStyle.APPLE), style, setStyle)
+            Text(when (style) { ThemeStyle.MATERIAL -> "原生 Material 控件与层次"; ThemeStyle.MIUIX -> "清晰圆角、蓝色强调与分组背景"; ThemeStyle.APPLE -> "参照 Apple 人机界面指南：系统蓝、分组背景与液态玻璃底栏" }, style = MaterialTheme.typography.bodySmall)
             Choice("列表条目样式", listOf("跟随预设" to "follow", "统一圆角" to "rounded"), prefs.listStyle, { value -> update { it.copy(listStyle = value) } })
             Choice("图标样式", listOf("单色图标" to "mono", "彩色图标" to "color"), prefs.iconStyle, { value -> update { it.copy(iconStyle = value) } })
             Choice("选项弹窗样式", listOf("跟随选项弹出" to "anchor", "居中弹窗" to "dialog"), prefs.popupStyle, { value -> update { it.copy(popupStyle = value) } })
@@ -109,7 +108,7 @@ fun AppearanceContent(prefs: AppearancePrefs, style: ThemeStyle, mode: ThemeMode
             if (mode != ThemeMode.LIGHT) Choice("深色风格", listOf("默认" to false, "纯黑" to true), prefs.amoled, { value -> update { it.copy(amoled = value) } })
             if (!prideActive) {
                 val sources = listOf("品牌配色" to "brand", "自定义" to "custom")
-                val source = if (prefs.colorSource == "brand" && dynamic && !prefs.glassEnabled && style != ThemeStyle.APPLE) "wallpaper" else prefs.colorSource
+                val source = if (prefs.colorSource == "brand" && dynamic && style != ThemeStyle.APPLE) "wallpaper" else prefs.colorSource
                 Choice("主题颜色来源", sources, source.takeIf { selected -> sources.any { it.second == selected } } ?: "brand",
                     { value -> setDynamic(value == "wallpaper"); update { it.copy(colorSource = value) } })
                 Text("配色预设", fontWeight = FontWeight.SemiBold)
@@ -190,11 +189,17 @@ fun AppearanceContent(prefs: AppearancePrefs, style: ThemeStyle, mode: ThemeMode
                 Preference("选择开屏壁纸", "内置壁纸或相册图片", { showWallpapers = true })
             }
         } }
-        item { SectionHeader("底部栏") }
-        item { TonalCard {
-            Choice("标签显示", listOf("图标与文字" to "both", "仅图标" to "icons", "仅文字" to "text"), prefs.dockLabels, { value -> update { it.copy(dockLabels = value) } })
-            Choice("玻璃材质", listOf("通透" to "clear", "均衡" to "balanced", "磨砂" to "frosted"), prefs.glassMaterial, { value -> update { it.copy(glassMaterial = value) } })
-        } }
+        if (style == ThemeStyle.APPLE) {
+            item { SectionHeader("液态玻璃") }
+            item { TonalCard {
+                Toggle("降低透明度", !prefs.glassEnabled, { value -> update { it.copy(glassEnabled = !value) } })
+                Text("开启后底栏改用不透明背景，便于阅读。", style = MaterialTheme.typography.bodySmall)
+                if (prefs.glassEnabled) {
+                    Choice("玻璃材质", listOf("通透" to "clear", "均衡" to "balanced", "磨砂" to "frosted"), prefs.glassMaterial, { value -> update { it.copy(glassMaterial = value) } })
+                    Choice("底栏标签", listOf("图标与文字" to "both", "仅图标" to "icons", "仅文字" to "text"), prefs.dockLabels, { value -> update { it.copy(dockLabels = value) } })
+                }
+            } }
+        }
         item { SectionHeader("语言") }
         item { TonalCard {
             Choice("应用语言", listOf("跟随系统" to "system", "简体中文" to "zh-CN", "繁體中文" to "zh-TW", "English" to "en"), prefs.language, { value -> update { it.copy(language = value) } })
@@ -231,7 +236,7 @@ private fun <T> Choice(title: String, options: List<Pair<String, T>>, selected: 
 @Composable
 private fun Toggle(title: String, checked: Boolean, onChange: (Boolean) -> Unit) {
     Row(Modifier.fillMaxWidth().heightIn(min = 56.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(title, Modifier.weight(1f)); Switch(checked, onChange)
+        Text(title, Modifier.weight(1f)); io.wenyou.textquest.ui.common.AppSwitch(checked, onChange)
     }
 }
 
