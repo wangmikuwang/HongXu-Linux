@@ -86,6 +86,12 @@
     <keyword xml:lang="zh-CN">剧情</keyword>
   </keywords>
   <releases>
+    <release version="1.6.0" date="2026-10-27">
+      <description>
+        <p>Progress saves automatically every turn; typed input comes back after an AI error, a stop or a missing AI service; editors ask before discarding unsaved changes and restarting or deleting asks first; Esc and the mouse back button close the console first and no longer empty the window. The settings home matches the other pages, and segmented options can be dragged.</p>
+        <p xml:lang="zh-CN">对局每回合自动存档；AI 出错、停止或缺少 AI 服务时输入会放回输入框；编辑器离开前提示未保存的修改，重开与删除先确认；Esc 与鼠标后退键先关闭控制台、不再出现空白窗口；设置首页风格统一，分段选项可拖动。</p>
+      </description>
+    </release>
     <release version="1.5.0" date="2026-10-16">
       <description>
         <p>A new Apple theme built on Apple's Human Interface Guidelines: iOS text styles, grouped backgrounds, left-aligned large titles, iOS switches, segmented controls and list rows. Liquid Glass now belongs to the Apple theme, with a new Reduce Transparency option.</p>

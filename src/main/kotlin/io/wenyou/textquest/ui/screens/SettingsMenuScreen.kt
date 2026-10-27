@@ -7,7 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -24,6 +24,11 @@ import io.wenyou.textquest.ui.R
 import io.wenyou.textquest.ui.common.AppText
 import io.wenyou.textquest.ui.common.uiLabel
 import io.wenyou.textquest.ui.theme.LocalAppearance
+import io.wenyou.textquest.ui.theme.LocalAccentPalette
+import io.wenyou.textquest.ui.theme.readableAccent
+import io.wenyou.textquest.ui.theme.distributedAccent
+import io.wenyou.textquest.ui.common.TonalCard
+import androidx.compose.foundation.border
 
 internal data class SettingsSection(val id: String, val title: String, val summary: String,
     val icon: ImageVector, val color: Color, val keywords: String)
@@ -59,21 +64,40 @@ internal fun SettingsMenuContent(onOpen: (String) -> Unit, modifier: Modifier = 
             SearchField(query, { query = it }, "搜索设置功能", Modifier.testTag("settings-search"))
             Spacer(Modifier.height(18.dp))
         }
-        items(visible, key = { it.id }) { section ->
-            Row(Modifier.fillMaxWidth().testTag("settings-${section.id}").clickable { onOpen(section.id) }
-                .padding(vertical = 18.dp), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(44.dp).background(section.color, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
-                    Icon(section.icon, null, Modifier.size(27.dp), tint = Color.White)
+        // One grouped card, like the cards on the other tabs; flag themes recolor the tiles.
+        if (visible.isNotEmpty()) item {
+            val flag = LocalAccentPalette.current.isNotEmpty()
+            TonalCard(Modifier.testTag("settings-group")) {
+                visible.forEach { section ->
+                    // Round tonal badges like the rest of the app; flag themes fill them with flag colors.
+                    // Flag themes draw the exact flag color as a ring, so every glyph keeps one color.
+                    val ring = distributedAccent(settingsSections.indexOf(section), section.color)
+                    // Flag themes repaint secondaryContainer with a stripe; keep the inner fill neutral there.
+                    val tile = if (flag) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.secondaryContainer
+                    if (section != visible.first())
+                        HorizontalDivider(Modifier.padding(start = 60.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = .5f))
+                    Row(Modifier.fillMaxWidth().heightIn(min = 64.dp).testTag("settings-${section.id}").clickable { onOpen(section.id) }
+                        .padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(44.dp)
+                            .then(if (flag) Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape).padding(1.dp)
+                                .background(tile, CircleShape).border(3.5.dp, ring, CircleShape) else Modifier.background(tile, CircleShape)),
+                            contentAlignment = Alignment.Center) {
+                            Icon(section.icon, null, Modifier.size(24.dp), tint = when {
+                                flag -> MaterialTheme.colorScheme.onSurface
+                                LocalAppearance.current.iconStyle == "color" -> MaterialTheme.colorScheme.readableAccent()
+                                else -> MaterialTheme.colorScheme.onSurfaceVariant
+                            })
+                        }
+                        Spacer(Modifier.width(16.dp))
+                        Column(Modifier.weight(1f)) {
+                            AppText(section.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                            AppText(section.summary, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        Spacer(Modifier.width(8.dp))
+                        Icon(AppIcons.KeyboardArrowRight, null, Modifier.size(24.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
-                Spacer(Modifier.width(16.dp))
-                Column(Modifier.weight(1f)) {
-                    AppText(section.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                    AppText(section.summary, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                Spacer(Modifier.width(8.dp))
-                Icon(AppIcons.KeyboardArrowRight, null, Modifier.size(24.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            HorizontalDivider(Modifier.padding(start = 60.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = .25f))
         }
         if (visible.isEmpty()) item { AppText("没有找到相关设置", Modifier.padding(vertical = 24.dp), color = MaterialTheme.colorScheme.onSurfaceVariant) }
     }

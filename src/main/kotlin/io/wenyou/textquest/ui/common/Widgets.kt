@@ -9,6 +9,11 @@ import io.wenyou.textquest.ui.theme.LocalAccentPalette
 
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.selection.selectable
@@ -189,22 +194,42 @@ fun AppSwitch(checked: Boolean, onCheckedChange: ((Boolean) -> Unit)?, modifier:
 private fun <T> AppleSegmented(label: String, options: List<Pair<String, T>>, selected: T?, onSelect: (T) -> Unit,
     modifier: Modifier, enabled: Boolean) {
     val dark = MaterialTheme.colorScheme.background.luminance() < .5f
+    val selectedIndex = options.indexOfFirst { it.second == selected }
+    // Like the dock: the thumb slides between segments and follows a horizontal drag, snapping on release.
+    var dragPosition by remember { mutableStateOf<Float?>(null) }
+    val animated by androidx.compose.animation.core.animateFloatAsState(selectedIndex.coerceAtLeast(0).toFloat(),
+        AppMotion.selection(), label = "segment-thumb")
+    val latestSelect by androidx.compose.runtime.rememberUpdatedState(onSelect)
+    val highlighted = dragPosition?.let { kotlin.math.round(it).toInt() } ?: selectedIndex
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Surface(shape = RoundedCornerShape(50), color = if (dark) Color(0xFF2C2C2E) else Color(0xFFEEEEF0)) {
-            Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(4.dp).selectableGroup(), verticalAlignment = Alignment.CenterVertically) {
-                options.forEach { (name, value) ->
-                    val isSelected = value == selected
-                    Surface(
-                        Modifier.weight(1f).heightIn(min = 40.dp)
+            androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(4.dp)
+                .then(if (!enabled) Modifier else Modifier.pointerInput(options.size) {
+                    val last = options.lastIndex.toFloat()
+                    detectHorizontalDragGestures(
+                        onDragStart = { offset -> dragPosition = (offset.x / size.width * options.size - .5f).coerceIn(0f, last) },
+                        onHorizontalDrag = { change, amount -> change.consume()
+                            dragPosition = ((dragPosition ?: animated) + amount / size.width * options.size).coerceIn(0f, last) },
+                        onDragCancel = { dragPosition = null },
+                        onDragEnd = { dragPosition?.let { latestSelect(options[kotlin.math.round(it).toInt()].second) }; dragPosition = null })
+                })) {
+                val slot = maxWidth / options.size
+                if (selectedIndex >= 0 || dragPosition != null) Surface(
+                    Modifier.width(slot).heightIn(min = 40.dp).align(Alignment.CenterStart)
+                        .graphicsLayer { translationX = (dragPosition ?: animated) * slot.toPx() },
+                    shape = RoundedCornerShape(50),
+                    color = if (dark) Color(0xFF636366) else Color.White,
+                    shadowElevation = if (!dark) 2.dp else 0.dp
+                ) {}
+                Row(Modifier.fillMaxWidth().selectableGroup(), verticalAlignment = Alignment.CenterVertically) {
+                    options.forEachIndexed { index, (name, value) ->
+                        val isSelected = value == selected
+                        Box(Modifier.weight(1f).heightIn(min = 40.dp).clip(RoundedCornerShape(50))
                             .selectable(isSelected, enabled = enabled, role = Role.RadioButton, onClick = { onSelect(value) }),
-                        shape = RoundedCornerShape(50),
-                        color = if (isSelected) (if (dark) Color(0xFF636366) else Color.White) else Color.Transparent,
-                        shadowElevation = if (isSelected && !dark) 2.dp else 0.dp
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
+                            contentAlignment = Alignment.Center) {
                             io.wenyou.textquest.ui.common.AppText(name, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.bodyMedium, fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                style = MaterialTheme.typography.bodyMedium, fontWeight = if (index == highlighted) FontWeight.SemiBold else FontWeight.Normal,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (enabled) 1f else .38f),
                                 modifier = Modifier.padding(horizontal = 8.dp))
                         }
