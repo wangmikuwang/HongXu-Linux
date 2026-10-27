@@ -91,6 +91,7 @@ fun StoryEditScreen(container: WenYouApp.AppContainer, nav: NavHostController, s
     )
     val ui by vm.ui.collectAsStateWithLifecycle()
     val story = ui.story
+    val leave = io.wenyou.textquest.ui.common.rememberLeaveGuard(ui.dirty) { nav.navigateUp() }
     var revisionOpen by remember { mutableStateOf(false) }
     var treeOpen by remember { mutableStateOf(false) }
     val progress by container.library.progress.collectAsStateWithLifecycle()
@@ -114,7 +115,7 @@ fun StoryEditScreen(container: WenYouApp.AppContainer, nav: NavHostController, s
             CenterAlignedTopAppBar(
                 title = { io.wenyou.textquest.ui.common.AppText(story?.title?.ifBlank { "未命名剧情" } ?: "剧情编辑器", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                 navigationIcon = {
-                    IconButton(onClick = { nav.navigateUp() }) {
+                    IconButton(onClick = leave) {
                         Icon(AppIcons.ArrowBack, "返回")
                     }
                 },
@@ -418,7 +419,16 @@ private fun NodeEditor(vm: StoryEditorViewModel, node: StoryNode, allNodeIds: Li
         }
 
         Spacer(Modifier.height(10.dp))
-        AppTextButton(onClick = { vm.removeNode(node.id) },
+        var confirmRemove by remember(node.id) { mutableStateOf(false) }
+        if (confirmRemove) androidx.compose.material3.AlertDialog(
+            onDismissRequest = { confirmRemove = false },
+            title = { Text("删除该节点？") },
+            text = { io.wenyou.textquest.ui.common.AppText("「${node.title.ifBlank { node.id }}」及其选项会被删除，指向它的选项需要重新连接。保存前离开编辑器可放弃这次删除。") },
+            confirmButton = {
+                AppTextButton(onClick = { confirmRemove = false; vm.removeNode(node.id) }) { Text("删除", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = { AppTextButton(onClick = { confirmRemove = false }) { Text("取消") } })
+        AppTextButton(onClick = { confirmRemove = true },
             enabled = vm.ui.value.story?.nodes?.size ?: 0 > 1) {
             Icon(AppIcons.Delete, null, tint = MaterialTheme.colorScheme.error)
             Spacer(Modifier.width(6.dp))

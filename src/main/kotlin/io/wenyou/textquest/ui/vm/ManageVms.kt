@@ -33,8 +33,12 @@ data class CharacterEditorState(
     val char: CharacterData? = null,
     val isNew: Boolean = true,
     val message: String = "",
-    val flagsText: String = ""
-)
+    val flagsText: String = "",
+    /** The character and flags text as last loaded or saved; leaving with anything else asks first. */
+    val saved: Pair<CharacterData?, String> = null to ""
+) {
+    val dirty: Boolean get() = (char to flagsText) != saved
+}
 
 class CharacterEditorViewModel(
     private val charId: String?,
@@ -50,12 +54,17 @@ class CharacterEditorViewModel(
         if (charId != null) {
             val c = library.characters.value.firstOrNull { it.id == charId }
             if (c == null) _ui.update { it.copy(message = "未找到该角色") }
-            else _ui.update { it.copy(char = c, isNew = false, flagsText = c.initial.flags.joinToString(", ")) }
+            else {
+                val flags = c.initial.flags.joinToString(", ")
+                _ui.update { it.copy(char = c, isNew = false, flagsText = flags, saved = c to flags) }
+            }
         } else {
+            val blank = CharacterData(id = UUID.randomUUID().toString(), name = "")
             _ui.update {
                 it.copy(
-                    char = CharacterData(id = UUID.randomUUID().toString(), name = ""),
-                    flagsText = ""
+                    char = blank,
+                    flagsText = "",
+                    saved = blank to ""
                 )
             }
         }
@@ -116,7 +125,7 @@ class CharacterEditorViewModel(
         viewModelScope.launch {
             try {
                 library.upsertCharacter(toSave)
-                _ui.update { it.copy(message = "已保存「${toSave.name}」", isNew = false) }
+                _ui.update { it.copy(message = "已保存「${toSave.name}」", isNew = false, saved = c to uiState.flagsText) }
             } catch (e: CancellationException) {
                 throw e
             } catch (t: Exception) {
@@ -135,8 +144,12 @@ data class ProviderEditorState(
     val message: String = "",
     val availableModels: List<String> = emptyList(),
     val listingModels: Boolean = false,
-    val listMessage: String = ""
-)
+    val listMessage: String = "",
+    /** The service as last loaded or saved; leaving with anything else asks first. */
+    val savedProfile: ApiProfile? = null
+) {
+    val dirty: Boolean get() = profile != savedProfile
+}
 
 class ProviderEditorViewModel(
     private val providerId: String?,
@@ -156,9 +169,10 @@ class ProviderEditorViewModel(
         if (providerId != null) {
             val p = library.providers.value.firstOrNull { it.id == providerId }
             if (p == null) _ui.update { it.copy(message = "未找到该服务") }
-            else _ui.update { it.copy(profile = p, isNew = false) }
+            else _ui.update { it.copy(profile = p, savedProfile = p, isNew = false) }
         } else {
-            _ui.update { it.copy(profile = freshFromPreset("deepseek")) }
+            val fresh = freshFromPreset("deepseek")
+            _ui.update { it.copy(profile = fresh, savedProfile = fresh) }
         }
     }
 
@@ -234,7 +248,7 @@ class ProviderEditorViewModel(
         }
         launchLibraryWrite {
             library.upsertProvider(p)
-            _ui.update { it.copy(message = "已保存「${p.name}」", isNew = false) }
+            _ui.update { it.copy(message = "已保存「${p.name}」", isNew = false, savedProfile = p) }
         }
     }
 

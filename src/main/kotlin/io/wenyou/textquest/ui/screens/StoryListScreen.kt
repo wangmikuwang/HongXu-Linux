@@ -589,6 +589,18 @@ private fun SavesDialog(
     onDismiss: () -> Unit
 ) {
     var renaming by remember { mutableStateOf<SaveSlot?>(null) }
+    var deleting by remember { mutableStateOf<SaveSlot?>(null) }
+    deleting?.let { slot ->
+        AlertDialog(
+            onDismissRequest = { deleting = null },
+            title = { Text("删除存档？") },
+            text = { io.wenyou.textquest.ui.common.AppText("「${slot.name}」将无法恢复。") },
+            confirmButton = {
+                AppTextButton(onClick = { onDelete(slot); deleting = null }) { Text("删除", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = { AppTextButton(onClick = { deleting = null }) { Text("取消") } }
+        )
+    }
     renaming?.let { slot ->
         var name by remember(slot.id) { mutableStateOf(slot.name.takeUnless(::isAutoSaveName).orEmpty()) }
         AlertDialog(
@@ -623,7 +635,7 @@ private fun SavesDialog(
                             IconButton(onClick = { renaming = slot }) {
                                 Icon(AppIcons.Edit, "重命名存档", tint = MaterialTheme.colorScheme.readableAccent())
                             }
-                            IconButton(onClick = { onDelete(slot) }) {
+                            IconButton(onClick = { deleting = slot }) {
                                 Icon(AppIcons.Delete, "删除", tint = MaterialTheme.colorScheme.error)
                             }
                         }

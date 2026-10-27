@@ -29,8 +29,13 @@ import io.wenyou.textquest.data.model.StoryMode
 import io.wenyou.textquest.data.model.StoryNode
 import io.wenyou.textquest.data.repo.LocalLibrary
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -67,7 +72,9 @@ data class PlayUi(
     val chapter: ChapterDraft? = null,
     val directorChat: List<DirectorMessage> = emptyList(),
     val directorChatBusy: Boolean = false,
-    val directorChatError: String = ""
+    val directorChatError: String = "",
+    /** A director-turn input handed back after the AI failed or was stopped, for the input box to restore. */
+    val restoredInput: String = ""
 )
 
 /**
@@ -102,6 +109,16 @@ class PlayViewModel internal constructor(
     /** 当前 AI 生成任务。发起新请求前会取消旧任务，避免重试等场景产生并发覆盖。 */
     private var aiJob: Job? = null
 
+    /** The last state written to the save, so an unchanged session is not written again. */
+    private var autoSaved: SessionState? = null
+
+    /**
+     * Saves are written one after another, in the order they were made, off the main thread and outside
+     * [viewModelScope], so the last turn is still written when the player leaves the game.
+     */
+    private val saveWriter = CoroutineScope(SupervisorJob() + Dispatchers.IO.limitedParallelism(1))
+    private val saveLock = Mutex()
+
     init {
         viewModelScope.launch {
             val story = library.stories.value.firstOrNull { it.id == storyId }
@@ -125,6 +142,7 @@ class PlayViewModel internal constructor(
             }
             if (loadedSlot == null) prepareRoleSelection(base)
             else beginPlay(story, base, isFresh = false)
+            autoSaved = session
         }
     }
 
@@ -273,6 +291,7 @@ class PlayViewModel internal constructor(
         val choices = ui.visibleChoices
         if (index !in choices.indices) return
         chooseBy(story, choices[index], ui.nodeId)
+        autoSave()
     }
 
     private fun chooseBy(story: Story, choice: ChoiceData, fromNodeId: String) {
@@ -315,6 +334,7 @@ class PlayViewModel internal constructor(
         } else {
             runAiScene()
         }
+        autoSave()
     }
 
     /** AI 场景结束该段，前往作者设定的主线出口。 */
@@ -325,6 +345,7 @@ class PlayViewModel internal constructor(
         if (target.isBlank() || target == node.id || !story.nodes.containsKey(target)) return
         _ui.update { it.copy(pendingAiChoices = emptyList()) }
         advanceTo(target)
+        autoSave()
     }
 
     // ---------------- AI 场景 / 导演 ----------------
@@ -465,6 +486,7 @@ class PlayViewModel internal constructor(
             session = session?.copy(pendingAiChoices = choices.map(::toChoiceData), aiAwaitingChoice = true)
             _ui.update { it.copy(stage = PlayStage.AUTHORED, aiReasoningDelta = "", pendingAiChoices = choices, visibleChoices = emptyList()) }
         }
+        autoSave()
     }
 
     fun continueAi() = runAiScene()
@@ -478,6 +500,7 @@ class PlayViewModel internal constructor(
             it.copy(stage = PlayStage.STOPPED, stoppedTitle = "AI 生成失败",
                 stoppedMessage = "$message\n\n你可以点「重试」，或（若设了主线出口）「回到主线」。")
         }
+        autoSave()
     }
 
     /** AI 导演自由对话。 */
@@ -492,11 +515,11 @@ class PlayViewModel internal constructor(
         if (profile == null) {
             appendEntries(listOf(LogEntry(EntryKind.ERROR, speaker = "系统",
                 text = "AI 导演模式需要先接入一家 AI 服务。")))
-            _ui.update { it.copy(providerMissing = true) }
+            _ui.update { it.copy(providerMissing = true, restoredInput = trimmed) }
             return
         }
         if (ui.stage != PlayStage.DM_INPUT || aiJob?.isActive == true) return
-        turnBeforeAi = TurnBeforeAi(s, ui.pendingAiChoices, directorTurn = true)
+        turnBeforeAi = TurnBeforeAi(s, ui.pendingAiChoices, directorTurn = true, input = trimmed)
         appendEntries(listOf(playerEntry(trimmed)))
         session = session?.copy(pendingAiChoices = emptyList(), aiAwaitingChoice = false)
         _ui.update { it.copy(stage = PlayStage.AI_WORKING, aiReasoningDelta = "", pendingAiChoices = emptyList(), providerMissing = false) }
@@ -514,6 +537,7 @@ class PlayViewModel internal constructor(
                     applyStateChanges(scene.stateEffects)
                     session = session?.copy(pendingAiChoices = scene.choices.map(::toChoiceData), aiAwaitingChoice = true)
                     _ui.update { it.copy(aiReasoningDelta = "", stage = PlayStage.DM_INPUT, pendingAiChoices = scene.choices) }
+                    autoSave()
                 }
             } catch (e: CancellationException) {
                 throw e
@@ -522,13 +546,14 @@ class PlayViewModel internal constructor(
                     // Restore the unconsumed turn so retrying a suggestion never duplicates player input.
                     session = s
                     appendEntries(listOf(LogEntry(EntryKind.ERROR, speaker = "系统", text = "AI 导演出错：${AiDirector.errorMessage(t)}")))
-                    _ui.update { it.copy(aiReasoningDelta = "", stage = PlayStage.DM_INPUT, pendingAiChoices = ui.pendingAiChoices) }
+                    _ui.update { it.copy(aiReasoningDelta = "", stage = PlayStage.DM_INPUT, pendingAiChoices = ui.pendingAiChoices,
+                        restoredInput = trimmed) }
                 }
             }
         }
     }
 
-    private data class TurnBeforeAi(val session: SessionState, val choices: List<AiChoice>, val directorTurn: Boolean)
+    private data class TurnBeforeAi(val session: SessionState, val choices: List<AiChoice>, val directorTurn: Boolean, val input: String = "")
     private var turnBeforeAi: TurnBeforeAi? = null
 
     /**
@@ -543,34 +568,62 @@ class PlayViewModel internal constructor(
         val before = turnBeforeAi
         if (before != null && before.directorTurn) {
             session = before.session
-            _ui.update { it.copy(stage = PlayStage.DM_INPUT, aiReasoningDelta = "", pendingAiChoices = before.choices, lastMessage = "已停止生成") }
+            _ui.update { it.copy(stage = PlayStage.DM_INPUT, aiReasoningDelta = "", pendingAiChoices = before.choices, lastMessage = "已停止生成",
+                restoredInput = before.input) }
         } else {
             before?.let { session = it.session }
             _ui.update { it.copy(stage = PlayStage.STOPPED, aiReasoningDelta = "", stoppedTitle = "已停止生成",
                 stoppedMessage = "这一幕还没有写完。点「重试」重新生成，或返回稍后再来。") }
         }
+        autoSave()
     }
 
     // ---------------- 存档 / 重开 ----------------
 
     fun saveNow() {
         val s = session ?: return
+        writeSave(s, quiet = false)
+    }
+
+    fun consumeRestoredInput() = _ui.update { it.copy(restoredInput = "") }
+
+    /**
+     * Saves progress by itself whenever a turn settles, into the save being played (a new one for a new game).
+     * A game nobody has acted in yet gets no save; a turn still being written is saved when it finishes.
+     */
+    private fun autoSave() {
+        val s = session ?: return
+        val stage = _ui.value.stage
+        if (stage == PlayStage.INIT || stage == PlayStage.ROLE_SELECT || stage == PlayStage.AI_WORKING) return
+        if (s === autoSaved || s.history.none { it.kind == EntryKind.CHOICE }) return
+        writeSave(s, quiet = true)
+    }
+
+    private fun writeSave(s: SessionState, quiet: Boolean) {
         val ui = _ui.value
         val story = ui.story ?: return
-        launchLibraryWrite {
+        // Auto names track the current step count; names the player chose are kept.
+        val name = ui.saveName.takeUnless(::isAutoSaveName) ?: autoSaveName(story.title, s.history.size)
+        val existing = ui.activeSaveId
+        val id = existing ?: UUID.randomUUID().toString()
+        // Claim the id now so a second save before this one is written updates the same slot.
+        autoSaved = s
+        _ui.update { it.copy(activeSaveId = id, saveName = name, lastMessage = if (quiet) it.lastMessage else "已存档「$name」") }
+        saveWriter.launch { saveLock.withLock { try {
             val now = System.currentTimeMillis()
-            // Auto names track the current step count; names the player chose are kept.
-            val name = ui.saveName.takeUnless(::isAutoSaveName) ?: autoSaveName(story.title, s.history.size)
-            val existing = ui.activeSaveId
-            val id = existing ?: UUID.randomUUID().toString()
             val createdAt = existing?.let { library.saves.value.firstOrNull { x -> x.id == it }?.createdAt } ?: now
             library.upsertSave(SaveSlot(id, name, createdAt, now, s))
-            _ui.update { it.copy(activeSaveId = id, saveName = name, lastMessage = "已存档「$name」") }
-        }
+        } catch (_: java.io.IOException) { /* 根界面统一显示写盘错误。 */ } } }
+    }
+
+    /** Leaving the game writes whatever has not been saved yet. */
+    override fun onCleared() {
+        autoSave()
     }
 
     fun setPace(pace: ScenePace) {
         session = session?.copy(pace = pace.name)
+        autoSave()
     }
 
     /** Asks the AI for a recap of the journey so far; shown for review before a new chapter starts. */
@@ -614,6 +667,7 @@ class PlayViewModel internal constructor(
             val result = runCatching { director.directorChat(profile, story, ui.characters, s, history, message) }
             result.onSuccess { reply ->
                 if (reply.note.isNotBlank()) session = session?.let { it.copy(directorNotes = (it.directorNotes + reply.note).takeLast(MAX_DIRECTOR_NOTES)) }
+                autoSave()
             }
             _ui.update { cur -> result.fold(
                 { cur.copy(directorChat = cur.directorChat + it, directorChatBusy = false) },
@@ -630,10 +684,12 @@ class PlayViewModel internal constructor(
             flags = state.flags.map { it.trim().take(120) }.filter { it.isNotEmpty() }.take(100).toSet(),
             description = state.description.trim().take(1000), lastChangeReason = AiDirector.MANUAL_STATE_REASON)
         session = s.copy(characterStates = s.characterStates + (charId to clean), updatedAt = System.currentTimeMillis())
+        autoSave()
     }
 
     fun removeDirectorNote(index: Int) {
         session = session?.let { s -> s.copy(directorNotes = s.directorNotes.filterIndexed { i, _ -> i != index }) }
+        autoSave()
     }
 
     /**
@@ -657,6 +713,7 @@ class PlayViewModel internal constructor(
         val newId = UUID.randomUUID().toString()
         val newName = "${story.title} · 新篇章"
         session = next
+        autoSaved = next
         _ui.update { it.copy(chapter = null, activeSaveId = newId, saveName = newName, pendingAiChoices = emptyList(),
             stage = PlayStage.DM_INPUT, stoppedTitle = "", stoppedMessage = "") }
         // One coroutine so the finished chapter is written before the new one.
@@ -669,6 +726,8 @@ class PlayViewModel internal constructor(
 
     fun restart() {
         val story = _ui.value.story ?: return
+        // The finished run stays in its save; the new one gets its own.
+        autoSave()
         // 若仍有未结束的生成任务，先取消，避免旧结果写入新开局
         aiJob?.cancel()
         aiJob = null

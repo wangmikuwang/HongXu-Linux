@@ -23,6 +23,7 @@ import io.wenyou.textquest.ui.common.AppTextButton
 import io.wenyou.textquest.ui.common.AppOutlinedButton
 
 import io.wenyou.textquest.ui.common.UsagePanel
+import androidx.activity.compose.BackHandler
 
 import io.wenyou.textquest.ui.common.GlassBackdrop
 import io.wenyou.textquest.ui.common.liquidGlass
@@ -55,7 +56,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextOverflow
@@ -165,6 +169,8 @@ fun PlayScreen(container: WenYouApp.AppContainer, nav: NavHostController, storyI
     var showProvider by remember { mutableStateOf(false) }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    // Esc (and the mouse back button) closes the console before leaving the game.
+    BackHandler(enabled = drawerState.isOpen) { scope.launch { drawerState.close() } }
     // Follow new lines only while the reader is at the end or has just acted; otherwise offer a jump instead.
     val nearEnd by remember { derivedStateOf {
         val info = listState.layoutInfo
@@ -482,6 +488,8 @@ private fun StreamingCard() {
 @Composable
 private fun ActionPanel(vm: PlayViewModel, ui: PlayUi, nav: NavHostController, visited: Set<String>) {
     if (ui.providerMissing && ui.stage == PlayStage.DM_INPUT) MissingProviderCard(nav)
+    var confirmRestart by rememberSaveable { mutableStateOf(false) }
+    if (confirmRestart) RestartDialog(onConfirm = { confirmRestart = false; vm.restart() }, onDismiss = { confirmRestart = false })
     when (ui.stage) {
         PlayStage.INIT, PlayStage.ROLE_SELECT -> Unit
         PlayStage.AI_WORKING -> {
@@ -558,32 +566,54 @@ private fun ActionPanel(vm: PlayViewModel, ui: PlayUi, nav: NavHostController, v
                 Surface(Modifier.fillMaxWidth(), color = Color.Transparent) {
                     Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically) {
-                        Text("存档后随时可在主页继续", style = MaterialTheme.typography.labelSmall,
+                        Text("进度自动存档，可随时在主页继续", style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.outline)
                         Spacer(Modifier.weight(1f))
-                        AppTextButton(onClick = { vm.restart() }) { Text("重开本局") }
+                        AppTextButton(onClick = { confirmRestart = true }) { Text("重开本局") }
                     }
                 }
             }
         }
-        PlayStage.DM_INPUT -> {
-            DmInput(ui, vm)
-        }
+        PlayStage.DM_INPUT -> Unit
         PlayStage.STOPPED -> {
-            StoppedPanel(ui, vm, nav)
+            StoppedPanel(ui, vm, nav, onRestart = { confirmRestart = true })
         }
     }
+    // Stays on screen while the director writes, so the next action can be drafted and a stopped turn's words come back.
+    if (ui.aiMode && (ui.stage == PlayStage.DM_INPUT || ui.stage == PlayStage.AI_WORKING)) DmInput(ui, vm)
+}
+
+/** Restarting starts a new save; the current run stays in its own. */
+@Composable
+private fun RestartDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(onDismissRequest = onDismiss, title = { Text("重新开始这个故事？") },
+        text = { Text("当前进度已自动存档，之后可在主页「继续」找回。") },
+        confirmButton = { Button(onClick = onConfirm, modifier = Modifier.testTag("confirm-restart")) { Text("重新开始") } },
+        dismissButton = { AppTextButton(onClick = onDismiss) { Text("取消") } })
 }
 
 @Composable
 private fun DmInput(ui: PlayUi, vm: PlayViewModel) {
     var text by rememberSaveable { mutableStateOf("") }
+    val busy = ui.stage != PlayStage.DM_INPUT
+    LaunchedEffect(ui.restoredInput) {
+        if (ui.restoredInput.isNotBlank()) {
+            text = if (text.isBlank()) ui.restoredInput else ui.restoredInput + "\n" + text
+            vm.consumeRestoredInput()
+        }
+    }
+    fun send() {
+        if (!busy && text.isNotBlank()) {
+            vm.dmSend(text)
+            text = ""
+        }
+    }
     Surface(Modifier.fillMaxWidth(), color = if (LocalGlassEnabled.current) Color.Transparent else MaterialTheme.colorScheme.surfaceContainerLow) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(if (ui.pendingAiChoices.isNotEmpty()) "推荐回复 · 点一下直接采用" else "写下你的行动，或让导演继续",
                     style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
-                AppTextButton(onClick = { vm.dmSend("继续") }) { Text("让导演继续") }
+                AppTextButton(onClick = { vm.dmSend("继续") }, enabled = !busy) { Text("让导演继续") }
             }
             // Full-width rows so long suggestions stay readable instead of being cut off in a sideways strip.
             ui.pendingAiChoices.forEach { c ->
@@ -601,11 +631,13 @@ private fun DmInput(ui: PlayUi, vm: PlayViewModel) {
                     // Desktop: Enter sends, Shift+Enter starts a new line.
                     modifier = Modifier.weight(1f).onPreviewKeyEvent { e ->
                         val send = e.type == KeyEventType.KeyDown && e.key == Key.Enter && !e.isShiftPressed
-                        if (send && text.isNotBlank()) { vm.dmSend(text); text = "" }
+                        if (send) send()
                         send
                     },
                     maxLines = 3,
                     minLines = 1,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                    keyboardActions = KeyboardActions(onSend = { send() }),
                     shape = MaterialTheme.shapes.large,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.readableAccent(),
@@ -616,13 +648,8 @@ private fun DmInput(ui: PlayUi, vm: PlayViewModel) {
                 )
                 Spacer(Modifier.width(8.dp))
                 IconButton(
-                    onClick = {
-                        if (text.isNotBlank()) {
-                            vm.dmSend(text)
-                            text = ""
-                        }
-                    },
-                    enabled = text.isNotBlank()
+                    onClick = { send() },
+                    enabled = !busy && text.isNotBlank()
                 ) {
                     Icon(AppIcons.Send, "发送", tint = MaterialTheme.colorScheme.readableAccent())
                 }
@@ -746,7 +773,7 @@ private fun MissingProviderCard(nav: NavHostController) {
 }
 
 @Composable
-private fun StoppedPanel(ui: PlayUi, vm: PlayViewModel, nav: NavHostController) {
+private fun StoppedPanel(ui: PlayUi, vm: PlayViewModel, nav: NavHostController, onRestart: () -> Unit) {
     Card(
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
@@ -764,7 +791,7 @@ private fun StoppedPanel(ui: PlayUi, vm: PlayViewModel, nav: NavHostController) 
                 if (ui.providerMissing) Button(onClick = { nav.navigate(io.wenyou.textquest.ui.R.providerEdit("new")) }, modifier = Modifier.fillMaxWidth()) {
                     Text("添加 AI 服务")
                 }
-                Button(onClick = { vm.restart() }, modifier = Modifier.fillMaxWidth()) {
+                Button(onClick = onRestart, modifier = Modifier.fillMaxWidth()) {
                     Icon(AppIcons.PlayArrow, null)
                     Spacer(Modifier.width(6.dp))
                     Text("再来一次")
@@ -950,7 +977,8 @@ private fun CharacterStateCard(ui: PlayUi, c: io.wenyou.textquest.data.model.Cha
 
 @Composable
 private fun ThinkingBlock(reasoning: String) {
-    var expanded by remember { mutableStateOf(false) }
+    // Saveable, so an opened block stays open after scrolling out of the list and back.
+    var expanded by rememberSaveable { mutableStateOf(false) }
     Surface(
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surfaceContainerLow,

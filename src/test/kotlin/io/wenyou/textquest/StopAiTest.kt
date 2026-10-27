@@ -48,6 +48,8 @@ class StopAiTest {
             assertEquals(PlayStage.DM_INPUT, vm.ui.value.stage)
             assertEquals(listOf("雨还在下。"), vm.ui.value.session!!.history.map { it.text })
             assertEquals(listOf("在窗边坐下"), vm.ui.value.pendingAiChoices.map { it.text })
+            // The typed words come back to the input box.
+            assertEquals("我推门进去", vm.ui.value.restoredInput)
         } finally { ok.dispatcher.executorService.shutdownNow(); Dispatchers.resetMain() }
     }
 }

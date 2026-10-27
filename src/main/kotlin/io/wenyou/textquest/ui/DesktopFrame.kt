@@ -1,5 +1,6 @@
 package io.wenyou.textquest.ui
 
+import androidx.activity.compose.DesktopBack
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -50,7 +51,7 @@ private val MaxContentWidth = 880.dp
 var windowKeyHandler: (KeyEvent) -> Boolean = { false }
 
 /**
- * Desktop keyboard and mouse: Esc and the mouse back button go back, Ctrl + = / - / 0 zoom the interface,
+ * Desktop keyboard and mouse: Esc and the mouse back button go back (see [goBack]), Ctrl + = / - / 0 zoom the interface,
  * and wide windows get a navigation rail with page content kept to a readable width.
  */
 @OptIn(ExperimentalComposeUiApi::class)
@@ -61,7 +62,7 @@ fun DesktopFrame(nav: NavHostController, settings: SettingsStore, content: @Comp
         onDispose { windowKeyHandler = { false } }
     }
     BoxWithConstraints(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
-        .onPointerEvent(PointerEventType.Press) { if (it.buttons.isBackPressed) nav.popBackStack() }) {
+        .onPointerEvent(PointerEventType.Press) { if (it.buttons.isBackPressed) goBack(nav) }) {
         val wide = maxWidth >= 840.dp
         CompositionLocalProvider(LocalWideLayout provides wide) {
             Row(Modifier.fillMaxSize()) {
@@ -74,8 +75,12 @@ fun DesktopFrame(nav: NavHostController, settings: SettingsStore, content: @Comp
     }
 }
 
+/** Esc and the mouse back button: an open drawer or an editor with unsaved changes handles it first; the first page stays. */
+private fun goBack(nav: NavHostController): Boolean =
+    DesktopBack.dispatch() || (nav.previousBackStackEntry != null && nav.popBackStack())
+
 private fun handleKey(event: KeyEvent, nav: NavHostController, settings: SettingsStore): Boolean {
-    if (event.key == Key.Escape) return nav.previousBackStackEntry != null && nav.popBackStack()
+    if (event.key == Key.Escape) return goBack(nav)
     if (!event.isCtrlPressed) return false
     val step = when (event.key) {
         Key.Equals, Key.Plus, Key.NumPadAdd -> 10

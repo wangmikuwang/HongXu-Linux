@@ -66,13 +66,14 @@ fun ProviderEditScreen(container: WenYouApp.AppContainer, nav: NavHostController
     val ui by vm.ui.collectAsStateWithLifecycle()
     val profile = ui.profile
     var showDelete by remember { mutableStateOf(false) }
+    val leave = io.wenyou.textquest.ui.common.rememberLeaveGuard(ui.dirty) { nav.navigateUp() }
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { io.wenyou.textquest.ui.common.AppText(if (ui.isNew) "接入 AI 服务" else "编辑服务") },
                 navigationIcon = {
-                    IconButton(onClick = { nav.navigateUp() }) {
+                    IconButton(onClick = leave) {
                         Icon(AppIcons.ArrowBack, "返回")
                     }
                 },

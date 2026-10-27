@@ -26,8 +26,12 @@ data class StoryEditorState(
     val characters: List<CharacterData> = emptyList(),
     val selectedNodeId: String = "start",
     val isNew: Boolean = true,
-    val message: String = ""
-)
+    val message: String = "",
+    /** The story as last loaded or saved; leaving with anything else asks first. */
+    val savedStory: Story? = null
+) {
+    val dirty: Boolean get() = story != savedStory
+}
 
 /** 剧情（节点图）可视化编辑器。storyId 为空表示新建。 */
 class StoryEditorViewModel(
@@ -45,8 +49,9 @@ class StoryEditorViewModel(
             it.copy(characters = library.characters.value)
         }
         if (storyId == null) {
+            val blank = blankStory()
             _ui.update {
-                it.copy(story = blankStory(), selectedNodeId = "start")
+                it.copy(story = blank, savedStory = blank, selectedNodeId = "start")
             }
         } else {
             val story = library.stories.value.firstOrNull { s -> s.id == storyId }
@@ -54,7 +59,7 @@ class StoryEditorViewModel(
                 _ui.update { it.copy(message = "未找到该剧情") }
             } else {
                 _ui.update {
-                    it.copy(story = story, selectedNodeId = story.startNodeId, isNew = false)
+                    it.copy(story = story, savedStory = story, selectedNodeId = story.startNodeId, isNew = false)
                 }
             }
         }
@@ -214,7 +219,7 @@ class StoryEditorViewModel(
             revisedCharacters.forEach { library.upsertCharacter(it) }
             library.upsertStory(clean)
             _ui.update {
-                it.copy(story = clean, isNew = false, message = "已保存「${clean.title}」")
+                it.copy(story = clean, savedStory = clean, isNew = false, message = "已保存「${clean.title}」")
             }
         }
     }

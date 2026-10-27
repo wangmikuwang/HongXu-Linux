@@ -45,8 +45,12 @@ class PlayerRoleTest {
             vm.chooseAuthored(0)
             val choice = vm.ui.value.session!!.history.last()
             assertEquals("a", choice.speakerId); assertEquals("阿雨", choice.speaker)
+            // The first action already saved the game by itself; a manual save updates that same save.
+            val autoSaved = withContext(Dispatchers.Default) { withTimeout(5_000) { library.saves.first { it.isNotEmpty() }.single() } }
+            assertEquals(vm.ui.value.session, autoSaved.state)
             vm.saveNow()
             val saved = withContext(Dispatchers.Default) { withTimeout(5_000) { library.saves.first { it.isNotEmpty() }.single() } }
+            assertEquals(autoSaved.id, saved.id)
             // Verify serialisation separately, then use the persisted save in the original library.
             val restored = AppJson.decodeFromString(SessionState.serializer(), AppJson.encodeToString(SessionState.serializer(), saved.state))
             assertEquals(saved.state, restored)

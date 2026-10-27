@@ -1114,4 +1114,16 @@ private fun english5(m: MutableMap<String, String>) {
     m["用顿号或逗号分隔，例如：成年、已和好"] = "Separate with commas, e.g. adult, made up"
     m["穿着/外观"] = "Outfit / appearance"
     m["玩家手动调整"] = "Adjusted by the player"
+    // Autosave, unsaved-change and delete confirmations.
+    m["进度自动存档，可随时在主页继续"] = "Progress saves automatically; continue any time from Home"
+    m["重新开始这个故事？"] = "Start this story over?"
+    m["当前进度已自动存档，之后可在主页「继续」找回。"] = "Your progress is saved automatically; pick it up later from “Continue” on Home."
+    m["重新开始"] = "Start over"
+    m["放弃未保存的修改？"] = "Discard unsaved changes?"
+    m["离开后，这次的修改不会保留。"] = "If you leave now, these changes are not kept."
+    m["放弃修改"] = "Discard"
+    m["继续编辑"] = "Keep editing"
+    m["「{0}」将无法恢复。"] = "“{0}” cannot be recovered."
+    m["删除该节点？"] = "Delete this node?"
+    m["「{0}」及其选项会被删除，指向它的选项需要重新连接。保存前离开编辑器可放弃这次删除。"] = "“{0}” and its choices will be deleted; choices that lead to it need a new target. Leave the editor without saving to undo this."
 }

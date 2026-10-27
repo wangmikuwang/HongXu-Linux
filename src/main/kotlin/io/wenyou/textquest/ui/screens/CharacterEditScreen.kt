@@ -60,6 +60,7 @@ fun CharacterEditScreen(container: WenYouApp.AppContainer, nav: NavHostControlle
     )
     val ui by vm.ui.collectAsStateWithLifecycle()
     val char = ui.char
+    val leave = io.wenyou.textquest.ui.common.rememberLeaveGuard(ui.dirty) { nav.navigateUp() }
     var revisionOpen by remember { mutableStateOf(false) }
     if (revisionOpen && char != null) AiRevisionDialog(container,
         io.wenyou.textquest.data.model.AppBundle(characters = listOf(vm.revisionDraft())),
@@ -70,7 +71,7 @@ fun CharacterEditScreen(container: WenYouApp.AppContainer, nav: NavHostControlle
             CenterAlignedTopAppBar(
                 title = { io.wenyou.textquest.ui.common.AppText(if (ui.isNew) "新建角色" else "编辑角色") },
                 navigationIcon = {
-                    IconButton(onClick = { nav.navigateUp() }) {
+                    IconButton(onClick = leave) {
                         Icon(AppIcons.ArrowBack, "返回")
                     }
                 }
